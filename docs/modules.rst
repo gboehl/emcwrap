@@ -1,30 +1,30 @@
 Module Documentation
 ====================
 
-``econpizza.load``
+``emcwrap.sampler``
 ------------------
-.. automodule:: econpizza.parsing
+.. automodule:: emcwrap.sampler
    :members:
    :undoc-members:
    :show-inheritance:
 
-``econpizza.find_stack``
+``emcwrap.stats``
 ------------------------
-.. automodule:: econpizza.stacking
+.. automodule:: emcwrap.stats
    :members:
    :undoc-members:
    :show-inheritance:
 
-``econpizza.find_pizza``
+``emcwrap.dists``
 ------------------------
-.. automodule:: econpizza.shooting
+.. automodule:: emcwrap.dists
    :members:
    :undoc-members:
    :show-inheritance:
 
-``econpizza.solve_stst``
+``emcwrap.plots``
 ------------------------
-.. automodule:: econpizza.steady_state
+.. automodule:: emcwrap.plots
    :members:
    :undoc-members:
    :show-inheritance:
