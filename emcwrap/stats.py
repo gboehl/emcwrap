@@ -5,7 +5,6 @@ import numpy as np
 import pandas as pd
 import scipy.stats as ss
 from grgrlib.stats import logpdf
-from numdifftools import Hessian
 
 
 def mdd_laplace(chain, lprobs, calc_hess=False):
@@ -20,6 +19,7 @@ def mdd_laplace(chain, lprobs, calc_hess=False):
 
     if calc_hess:
 
+        from numdifftools import Hessian
 
         np.warnings.filterwarnings("ignore")
         hh = Hessian(func)(mode_x)
@@ -115,6 +115,7 @@ def calc_min_interval(x, alpha):
         hdi_max = x[min_idx + interval_idx_inc]
 
         return hdi_min, hdi_max
+
 
 def mc_error(x):
     means = np.mean(x, 0)
