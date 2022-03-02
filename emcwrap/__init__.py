@@ -2,6 +2,6 @@
 # -*- coding: utf-8 -*-
 
 from .sampler import *
+from .tools import *
 from .stats import *
-from .dists import *
 from .plots import *
