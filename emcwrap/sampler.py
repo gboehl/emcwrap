@@ -196,7 +196,7 @@ def get_prior_sample(frozen_prior, nsamples, check_func=False, seed=None, mapper
         return pdraw, no
 
     if verbose > 1:
-        print("[prior_sample:]".ljust(15, " ") + " Sampling from the pior...")
+        print("(prior_sample:) Sampling from the pior...")
 
     wrapper = tqdm.tqdm if verbose < 2 else (lambda x, **kwarg: x)
     pmap_sim = wrapper(mapper(runner, range(nsamples)), total=nsamples)
@@ -204,9 +204,7 @@ def get_prior_sample(frozen_prior, nsamples, check_func=False, seed=None, mapper
     draws, nos = map2arr(pmap_sim)
 
     if verbose and check_func:
-        print(
-            "[prior_sample:]".ljust(15, " ")
-            + " Sampling done. Check fails for %2.2f%% of the prior."
+        print("(prior_sample:) Sampling done. Check fails for %2.2f%% of the prior."
             % (100 * (sum(nos) - nsamples) / sum(nos))
         )
 
