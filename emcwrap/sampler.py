@@ -186,6 +186,8 @@ def get_prior_sample(frozen_prior, nsamples, check_func=False, seed=None, mapper
                     if check_func:
                         draw_prob = check_func(pdraw)
                         done = not np.any(np.isinf(draw_prob))
+                    else:
+                        done = True
 
                 except Exception as e:
                     if verbose > 1:
@@ -205,7 +207,7 @@ def get_prior_sample(frozen_prior, nsamples, check_func=False, seed=None, mapper
 
     if verbose and check_func:
         print("(prior_sample:) Sampling done. Check fails for %2.2f%% of the prior."
-            % (100 * (sum(nos) - nsamples) / sum(nos))
-        )
+              % (100 * (sum(nos) - nsamples) / sum(nos))
+              )
 
     return draws
