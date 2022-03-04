@@ -1,4 +1,3 @@
-
 #!/bin/python
 # -*- coding: utf-8 -*-
 
@@ -51,7 +50,7 @@ def run_mcmc(lprob, p0, nsteps, moves=None, priors=None, backend=None, update_fr
 
         if not verbose:
             lls = list(result)[1]
-            maf = np.mean(sampler.acceptance_fraction[-update_freq:]) * 100
+            maf = np.mean(sampler.acceptance_fraction) * 100
             pbar.set_description(
                 "[ll/MAF:%s(%1.0e)/%1.0f%%]" % (str(np.max(lls))
                                                 [:7], np.std(lls), maf)

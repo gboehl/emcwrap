@@ -1,6 +1,7 @@
 #!/bin/python
 # -*- coding: utf-8 -*-
 
+import os
 import emcee
 import numpy as np
 import scipy.stats as ss
@@ -88,7 +89,7 @@ def get_prior(prior, verbose=False):
                     % (pp, ptype, pmean, pstdd, dist[0], dist[1], dist[2])
                 )
 
-    return prior_lst, lambda x: log_prior(x,prior_lst), initv, (lb, ub)
+    return prior_lst, lambda x: log_prior(x, prior_lst), initv, (lb, ub)
 
 
 def log_prior(par, frozen_prior):
@@ -155,3 +156,11 @@ def load_backend(backend):
             exec('reader.%s = g[key][...]' % key.decode())
 
     return reader
+
+
+def remove_backend(backend):
+    """just a shortcut"""
+
+    os.remove(backend)
+
+    return
