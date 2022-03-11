@@ -11,8 +11,6 @@ from .stats import summary
 
 def run_mcmc(lprob, p0, nsteps, moves=None, priors=None, backend=None, update_freq=None, resume=False, pool=None, report=None, description=None, temp=1, maintenance_interval=False, seed=None, verbose=False, **kwargs):
 
-    nwalks, ndim = np.shape(p0)
-
     if seed is None:
         seed = 0
 
@@ -23,16 +21,15 @@ def run_mcmc(lprob, p0, nsteps, moves=None, priors=None, backend=None, update_fr
             os.path.splitext(backend)[0] + '.h5')
 
     if resume:
-        nwalks = backend.get_chain().shape[1]
+        p0 = backend.get_chain()[-1]
+
+    nwalks, ndim = np.shape(p0)
 
     if update_freq is None:
         update_freq = nsteps // 5
 
     sampler = emcee.EnsembleSampler(
         nwalks, ndim, lprob, moves=moves, pool=pool, backend=backend)
-
-    if resume and not p0:
-        p0 = sampler.get_last_sample()
 
     if not verbose:  # verbose means VERY verbose
         np.warnings.filterwarnings("ignore")
