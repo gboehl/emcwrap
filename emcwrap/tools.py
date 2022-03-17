@@ -150,10 +150,11 @@ def load_backend(backend):
     with reader.open() as f:
 
         g = f[reader.name]
-        keys = g["keys"][...]
+        if 'keys' in g:
+            keys = g["keys"][...]
 
-        for key in keys:
-            exec('reader.%s = g[key][...]' % key.decode())
+            for key in keys:
+                exec('reader.%s = g[key][...]' % key.decode())
 
     return reader
 
@@ -164,3 +165,6 @@ def remove_backend(backend):
     os.remove(backend)
 
     return
+
+
+rm_backend = remove_backend
