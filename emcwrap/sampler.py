@@ -9,7 +9,7 @@ from grgrlib import map2arr
 from .stats import summary
 
 
-def run_mcmc(lprob, p0, nsteps, moves=None, priors=None, backend=None, update_freq=None, resume=False, pool=None, report=None, description=None, temp=1, maintenance_interval=False, seed=None, verbose=False, **kwargs):
+def run_mcmc(lprob, nsteps, p0=None, moves=None, priors=None, backend=None, update_freq=None, resume=False, pool=None, report=None, description=None, temp=1, maintenance_interval=False, seed=None, verbose=False, **kwargs):
 
     if seed is None:
         seed = 0
@@ -189,6 +189,7 @@ def get_prior_sample(frozen_prior, nsamples, check_func=False, seed=None, mapper
                     if verbose > 1:
                         print(str(e) + " (%s) " % no)
                     if not locseed and no == 10:
+                        print("(prior_sample:) After 10 unsuccesful atempts:")
                         raise
 
         return pdraw, no
