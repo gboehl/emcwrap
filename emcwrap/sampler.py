@@ -87,7 +87,7 @@ def run_mcmc(lprob, p0, nsteps, moves=None, priors=None, backend=None, update_fr
                 )
 
             report(
-                "Autocorrelation times are between {min_tau} and {max_tau}."
+                f"Autocorrelation times are between {min_tau} and {max_tau}."
             )
 
         if cnt and update_freq and not (cnt + 1) % update_freq:
