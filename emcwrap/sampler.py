@@ -47,22 +47,23 @@ def run_mcmc(lprob, p0, nsteps, moves=None, priors=None, backend=None, update_fr
 
         if not verbose:
             lls = list(result)[1]
-            maf = np.mean(sampler.acceptance_fraction) * 100
+            try:
+                maf = f"{np.mean(sampler.acceptance_fraction) * 100:2.0f}"
+            except BlockingIOError:
+                maf = "??"
             pbar.set_description(
-                "[ll/MAF:%s(%1.0e)/%1.0f%%]" % (str(np.max(lls))
-                                                [:7], np.std(lls), maf)
+                f"[ll/MAF:{np.max(lls):0.7f}({np.std(lls):1.0e})/{maf}%]"
             )
 
         if cnt and update_freq and not cnt % update_freq:
 
-            prnttup = "(mcmc:) Summary from last %s of %s iterations" % (
-                update_freq, cnt)
+            prnttup = f"(mcmc:) Summary from last {update_freq} of {cnt} iterations" 
 
             if temp < 1:
-                prnttup += " with temp of %s%%" % (np.round(temp * 100, 6))
+                prnttup += f" with temp of {temp * 100:1.6f}"
 
             if description is not None:
-                prnttup += " (%s)" % str(description)
+                prnttup += f" ({str(description)})"
 
             prnttup += ":"
 
@@ -72,13 +73,9 @@ def run_mcmc(lprob, p0, nsteps, moves=None, priors=None, backend=None, update_fr
             lprobs = sampler.get_log_prob(flat=True)
             acfs = sampler.acceptance_fraction
 
-            tau = emcee.autocorr.integrated_time(sample, tol=0)
+            tau = emcee.autocorr.integrated_time(sample, tol=0, c=10)
             min_tau = np.min(tau).round(2)
             max_tau = np.max(tau).round(2)
-            dev_tau = np.max(np.abs(old_tau - tau) / tau)
-
-            tau_sign = ">" if max_tau > sampler.iteration / 50 else "<"
-            dev_sign = ">" if dev_tau > 0.01 else "<"
 
             if priors is not None:
                 mcmc_summary(
@@ -90,15 +87,7 @@ def run_mcmc(lprob, p0, nsteps, moves=None, priors=None, backend=None, update_fr
                 )
 
             report(
-                "Convergence stats: tau is in (%s,%s) (%s%s) and change is %s (%s0.01)."
-                % (
-                    min_tau,
-                    max_tau,
-                    tau_sign,
-                    sampler.iteration / 50,
-                    dev_tau.round(3),
-                    dev_sign,
-                )
+                "Autocorrelation times are between {min_tau} and {max_tau}."
             )
 
         if cnt and update_freq and not (cnt + 1) % update_freq:
@@ -189,6 +178,7 @@ def get_prior_sample(frozen_prior, nsamples, check_func=False, seed=None, mapper
                     if verbose > 1:
                         print(str(e) + " (%s) " % no)
                     if not locseed and no == 10:
+                        print("(prior_sample:) After 10 unsuccsful attempts:")
                         raise
 
         return pdraw, no
