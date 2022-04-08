@@ -10,18 +10,18 @@ class InvGammaDynare(ss.rv_continuous):
 
     name = "inv_gamma_dynare"
 
+    # @np.vectorize
     def _logpdf(self, x, s, nu):
 
-        if x < 0:
-            lpdf = -np.inf
-        else:
-            lpdf = (
-                np.log(2)
-                - gammaln(nu / 2)
-                - nu / 2 * (np.log(2) - np.log(s))
-                - (nu + 1) * np.log(x)
-                - 0.5 * s / np.square(x)
-            )
+        lpdf = np.empty_like(x)
+        lpdf[:] = -np.inf
+        lpdf[x >= 0] = (
+            np.log(2)
+            - gammaln(nu[x >= 0] / 2)
+            - nu[x >= 0] / 2 * (np.log(2) - np.log(s[x >= 0]))
+            - (nu[x >= 0] + 1) * np.log(x[x >= 0])
+            - 0.5 * s[x >= 0] / np.square(x[x >= 0])
+        )
 
         return lpdf
 
