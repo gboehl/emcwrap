@@ -190,6 +190,8 @@ def get_prior_sample(frozen_prior, nsamples, check_func=False, seed=None, mapper
                     if not locseed and no == max_attempts:
                         raise type(e)(
                             str(e) + f" (after {no} unsuccessful attemps).").with_traceback(sys.exc_info()[2])
+                    else:
+                        pass
 
         return pdraw, no
 
