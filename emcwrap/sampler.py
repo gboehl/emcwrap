@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import sys
 import tqdm
 import emcee
 import numpy as np
@@ -10,6 +11,8 @@ from .stats import summary
 
 
 def run_mcmc(lprob, nsteps, p0=None, moves=None, priors=None, backend=None, update_freq=None, resume=False, pool=None, report=None, description=None, temp=1, maintenance_interval=False, seed=None, verbose=False, **kwargs):
+    """Run the emcee sampler.
+    """
 
     if seed is None:
         seed = 0
@@ -152,7 +155,9 @@ def mcmc_summary(
     return res
 
 
-def get_prior_sample(frozen_prior, nsamples, check_func=False, seed=None, mapper=map, verbose=True):
+def get_prior_sample(frozen_prior, nsamples, check_func=False, seed=None, mapper=map, filterwarnings='error', max_attempts=10, debug=False, verbose=True):
+    """Get a sample of size `nsamples` from the prior distribution.
+    """
 
     if seed is None:
         seed = 0
@@ -162,6 +167,7 @@ def get_prior_sample(frozen_prior, nsamples, check_func=False, seed=None, mapper
 
     def runner(locseed):
 
+        # distribute seed evenly
         np.random.seed(seed + locseed)
         done = False
         no = 0
@@ -172,25 +178,29 @@ def get_prior_sample(frozen_prior, nsamples, check_func=False, seed=None, mapper
 
             with np.warnings.catch_warnings(record=False):
                 try:
-                    np.warnings.filterwarnings("error")
+                    # set warnings
+                    np.warnings.filterwarnings(filterwarnings)
                     rst = np.random.randint(2 ** 31)  # win explodes with 2**32
+                    # draw from prior
                     pdraw = [
                         pl.rvs(random_state=rst + sn)
                         for sn, pl in enumerate(frozen_prior)
                     ]
 
+                    # check if function returns finite results (if provided)
                     if check_func:
                         draw_prob = check_func(pdraw)
                         done = not np.any(np.isinf(draw_prob))
                     else:
                         done = True
 
+                # be kind to errors
                 except Exception as e:
-                    if verbose > 1:
-                        print(str(e) + " (%s) " % no)
-                    if not locseed and no == 10:
-                        print("(prior_sample:) After 10 unsuccesful atempts:")
-                        raise
+                    if debug:
+                        print(str(e) + f" ({no})")
+                    if not locseed and no == max_attempts:
+                        raise type(e)(
+                            str(e) + f" (after {no} unsuccessful attemps).").with_traceback(sys.exc_info()[2])
 
         return pdraw, no
 
@@ -203,8 +213,7 @@ def get_prior_sample(frozen_prior, nsamples, check_func=False, seed=None, mapper
     draws, nos = map2arr(pmap_sim)
 
     if verbose and check_func:
-        print("(prior_sample:) Sampling done. Check fails for %2.2f%% of the prior."
-              % (100 * (sum(nos) - nsamples) / sum(nos))
-              )
+        print(
+            f"(prior_sample:) Sampling done. Check fails for {100 * (sum(nos) - nsamples) / sum(nos):2.2f}%% of the prior.")
 
     return draws
