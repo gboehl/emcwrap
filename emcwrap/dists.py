@@ -13,6 +13,10 @@ class InvGammaDynare(ss.rv_continuous):
     # @np.vectorize
     def _logpdf(self, x, s, nu):
 
+        x = np.atleast_1d(x)
+        s = np.atleast_1d(s)
+        nu = np.atleast_1d(nu)
+
         lpdf = np.empty_like(x)
         lpdf[:] = -np.inf
         lpdf[x >= 0] = (
