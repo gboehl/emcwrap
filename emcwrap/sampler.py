@@ -205,6 +205,6 @@ def get_prior_sample(frozen_prior, nsamples, check_func=False, seed=None, mapper
 
     if verbose and check_func:
         print(
-            f"(prior_sample:) Sampling done. Check fails for {100 * (sum(nos) - nsamples) / sum(nos):2.2f}%% of the prior.")
+            f"(prior_sample:) Sampling done. Check fails for {100 * (sum(nos) - nsamples) / sum(nos):2.2f}% of the prior.")
 
     return draws
