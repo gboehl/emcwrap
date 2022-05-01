@@ -21,13 +21,19 @@ class ADEMove(RedBlueMove):
             vector. By default, it is :math:`2.38 / \sqrt{2\,\mathrm{ndim}}`
             as recommended by the two references.
         threshold: (Optional[float]): the threshold proability for adapting an alternative walker. Should be _very_ low (e.g. `1e-32`).
+        log_threshold: (Optional[float]): the threshold proability for adapting an alternative walker in log space. Should be _very_ low (e.g. `-100`).
     """
 
-    def __init__(self, sigma=1.0e-5, gamma=None, threshold=0, verbose=False, **kwargs):
+    def __init__(self, sigma=1.0e-5, gamma=None, threshold=0, log_threshold=None, verbose=False, **kwargs):
         self.sigma = sigma
         self.gamma = gamma
-        self.threshold = threshold
         self.verbose = verbose
+
+        if log_threshold and threshold:
+            raise RuntimeError("Either provide `threshold` OR `log_threshold`.")
+
+        self.threshold = np.exp(log_threshold) if log_threshold else threshold
+
         kwargs["nsplits"] = 3
         super(ADEMove, self).__init__(**kwargs)
 
