@@ -4,6 +4,7 @@ import numpy as np
 
 from emcee.moves.red_blue import RedBlueMove
 from emcee.state import State
+from emcee.ensemble import walkers_independent
 
 __all__ = ["ADEMove"]
 
