@@ -1,0 +1,126 @@
+# -*- coding: utf-8 -*-
+
+import numpy as np
+
+from emcee.moves.red_blue import RedBlueMove
+from emcee.state import State
+
+__all__ = ["ADEMove"]
+
+
+class ADEMove(RedBlueMove):
+    r"""A proposal using differential evolution.
+    This `Differential evolution proposal
+    <http://www.stat.columbia.edu/~gelman/stuff_for_blog/cajo.pdf>`_ is
+    implemented following `Nelson et al. (2013)
+    <https://arxiv.org/abs/1311.5229>`_.
+    Args:
+        sigma (float): The standard deviation of the Gaussian used to stretch
+            the proposal vector.
+        gamma (Optional[float]): The mean stretch factor for the proposal
+            vector. By default, it is :math:`2.38 / \sqrt{2\,\mathrm{ndim}}`
+            as recommended by the two references.
+    """
+
+    def __init__(self, sigma=1.0e-5, gamma=None, threshold=0, verbose=False, **kwargs):
+        self.sigma = sigma
+        self.gamma = gamma
+        self.threshold = threshold
+        self.verbose = verbose
+        kwargs["nsplits"] = 3
+        super(ADEMove, self).__init__(**kwargs)
+
+    def setup(self, coords):
+        if self.gamma is None:
+            # not that much magic:
+            ndim = coords.shape[1]
+            self.gamma = 2.38 / np.sqrt(2 * ndim)
+
+    def get_proposal(self, s, c, random):
+        Ns = len(s)
+        Nc = list(map(len, c))
+        ndim = s.shape[1]
+        q = np.empty((Ns, ndim), dtype=np.float64)
+        f = self.sigma * random.randn(Ns)
+        for i in range(Ns):
+            w = np.array([c[j][random.randint(Nc[j])] for j in range(2)])
+            random.shuffle(w)
+            g = np.diff(w, axis=0) * self.gamma + f[i]
+            q[i] = s[i] + g
+        return q, np.zeros(Ns, dtype=np.float64)
+
+    def propose(self, model, state):
+        """Use the move to generate a proposal and compute the acceptance
+        Args:
+            coords: The initial coordinates of the walkers.
+            log_probs: The initial log probabilities of the walkers.
+            log_prob_fn: A function that computes the log probabilities for a
+                subset of walkers.
+            random: A numpy-compatible random number state.
+        """
+        # Check that the dimensions are compatible.
+        nwalkers, ndim = state.coords.shape
+        if nwalkers < 2 * ndim and not self.live_dangerously:
+            raise RuntimeError(
+                "It is unadvisable to use a red-blue move "
+                "with fewer walkers than twice the number of "
+                "dimensions."
+            )
+
+        # Run any move-specific setup.
+        self.setup(state.coords)
+
+        # Split the ensemble in half and iterate over these two halves.
+        accepted = np.zeros(nwalkers, dtype=bool)
+        all_inds = np.arange(nwalkers)
+        inds = all_inds % self.nsplits
+        if self.randomize_split:
+            model.random.shuffle(inds)
+
+        for split in range(self.nsplits):
+            S1 = inds == split
+
+            # Get the splits of the ensemble.
+            sets = [state.coords[inds == j] for j in range(self.nsplits)]
+
+            # Get probs 
+            probs = state.log_prob[S1]
+
+            # compare each walker _within_ split
+            shuffled_inds = np.arange(len(probs))
+            model.random.shuffle(shuffled_inds)
+
+            # adapt those that are extremely unlikely
+            if self.threshold:
+                adapt = probs - probs[shuffled_inds] < np.log(self.threshold)
+
+            s = sets[split]
+            if self.threshold:
+                # get proposal for adapted walker. 
+                # if proposal is rejected, nothing will happen
+                s[adapt] = sets[split][shuffled_inds][adapt]
+            c = sets[:split] + sets[split + 1:]
+
+            # Get the move-specific proposal.
+            q, factors = self.get_proposal(s, c, model.random)
+
+            # Compute the lnprobs of the proposed position.
+            new_log_probs, new_blobs = model.compute_log_prob_fn(q)
+
+            # Loop over the walkers and update them accordingly.
+            for i, (j, f, nlp) in enumerate(
+                zip(all_inds[S1], factors, new_log_probs)
+            ):
+                lnpdiff = f + nlp - state.log_prob[j]
+                if lnpdiff > np.log(model.random.rand()):
+                    accepted[j] = True
+
+            new_state = State(q, log_prob=new_log_probs, blobs=new_blobs)
+            state = self.update(state, new_state, accepted, S1)
+
+            if self.threshold:
+                accepted_adapted = sum(accepted[S1][adapt])
+                if self.verbose and accepted_adapted:
+                    print(f'(ADEMove:) Accepted {accepted_adapted} of {sum(adapt)} proposed adaptations (total: {len(adapt)} walkers).')
+
+        return state, accepted
