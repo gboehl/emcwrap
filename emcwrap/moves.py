@@ -134,8 +134,7 @@ class ADEMove(RedBlueMove):
             state = self.update(state, new_state, accepted, S1)
 
             if self.threshold:
-                accepted_adapted = sum(accepted[S1][adapt])
-                if self.verbose and accepted_adapted:
-                    print(f'(ADEMove:) Accepted {accepted_adapted} of {sum(adapt)} proposed adaptations (total: {len(adapt)} walkers).')
+                if self.verbose and sum(adapt):
+                    print(f'(ADEMove:) Accepted {sum(accepted[S1][adapt])} of {sum(adapt)} proposed adaptations in split {split}.')
 
         return state, accepted
