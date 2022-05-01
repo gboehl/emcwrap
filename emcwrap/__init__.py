@@ -5,4 +5,4 @@ from .sampler import *
 from .tools import *
 from .stats import *
 from .plots import *
-from .moves import ADEMove
+from .moves import *
