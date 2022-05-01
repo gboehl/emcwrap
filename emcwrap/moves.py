@@ -74,6 +74,13 @@ class ADEMove(RedBlueMove):
                 "dimensions."
             )
 
+        if not walkers_independent(state.coords):
+            raise ValueError(
+                "Current state has a large condition number. "
+                "Make sure that your walkers are linearly independent for the "
+                "best performance"
+            )
+
         # Run any move-specific setup.
         self.setup(state.coords)
 
