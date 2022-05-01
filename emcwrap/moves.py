@@ -20,7 +20,7 @@ class ADEMove(RedBlueMove):
         gamma (Optional[float]): The mean stretch factor for the proposal
             vector. By default, it is :math:`2.38 / \sqrt{2\,\mathrm{ndim}}`
             as recommended by the two references.
-        threshold: (Optional[float]): the threshold value for adaptation. Should be _very_ low (e.g. `1e-32`).
+        threshold: (Optional[float]): the threshold proability for adapting an alternative walker. Should be _very_ low (e.g. `1e-32`).
     """
 
     def __init__(self, sigma=1.0e-5, gamma=None, threshold=0, verbose=False, **kwargs):
