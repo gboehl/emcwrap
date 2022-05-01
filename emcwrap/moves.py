@@ -33,7 +33,8 @@ class ADEMove(RedBlueMove):
         if log_threshold and threshold:
             raise RuntimeError("Either provide `threshold` OR `log_threshold`.")
 
-        self.threshold = log_threshold if log_threshold else np.log(threshold)
+        log_threshold_from_thres = np.log(threshold) if threshold else -np.inf
+        self.threshold = log_threshold if log_threshold else log_threshold_from_thres
 
         kwargs["nsplits"] = 3
         super(ADEMove, self).__init__(**kwargs)
