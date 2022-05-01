@@ -33,8 +33,8 @@ class ADEMove(RedBlueMove):
         if log_threshold and threshold:
             raise RuntimeError("Either provide `threshold` OR `log_threshold`.")
 
-        log_threshold_from_thres = np.log(threshold) if threshold else -np.inf
-        self.threshold = log_threshold if log_threshold else log_threshold_from_thres
+        log_threshold_from_threshold = np.log(threshold) if threshold else -np.inf
+        self.log_threshold = log_threshold if log_threshold else log_threshold_from_threshold
 
         kwargs["nsplits"] = 3
         super(ADEMove, self).__init__(**kwargs)
@@ -107,14 +107,12 @@ class ADEMove(RedBlueMove):
             model.random.shuffle(shuffled_inds)
 
             # adapt those that are extremely unlikely
-            if self.threshold:
-                adapt = probs - probs[shuffled_inds] < self.threshold
+            adapt = probs - probs[shuffled_inds] < self.log_threshold
 
             s = sets[split]
-            if self.threshold:
-                # get proposal for adapted walker. 
-                # if proposal is rejected, nothing will happen
-                s[adapt] = sets[split][shuffled_inds][adapt]
+            # get proposal for adapted walker. 
+            # if proposal is rejected, nothing will happen
+            s[adapt] = s[shuffled_inds][adapt]
             c = sets[:split] + sets[split + 1:]
 
             # Get the move-specific proposal.
@@ -134,8 +132,7 @@ class ADEMove(RedBlueMove):
             new_state = State(q, log_prob=new_log_probs, blobs=new_blobs)
             state = self.update(state, new_state, accepted, S1)
 
-            if self.threshold:
-                if self.verbose and sum(adapt):
-                    print(f'(ADEMove:) Accepted {sum(accepted[S1][adapt])} of {sum(adapt)} proposed adaptations in split {split}.')
+            if self.verbose and sum(adapt):
+                print(f'(ADEMove:) Accepted {sum(accepted[S1][adapt])} of {sum(adapt)} proposed adaptations in split {split}.')
 
         return state, accepted
