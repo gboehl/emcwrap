@@ -9,8 +9,8 @@ __all__ = ["ADEMove"]
 
 
 class ADEMove(RedBlueMove):
-    r"""A proposal using differential evolution.
-    This `Differential evolution proposal
+    r"""A proposal using adaptive differential evolution following
+    `Differential evolution proposal
     <http://www.stat.columbia.edu/~gelman/stuff_for_blog/cajo.pdf>`_ is
     implemented following `Nelson et al. (2013)
     <https://arxiv.org/abs/1311.5229>`_.
@@ -20,6 +20,7 @@ class ADEMove(RedBlueMove):
         gamma (Optional[float]): The mean stretch factor for the proposal
             vector. By default, it is :math:`2.38 / \sqrt{2\,\mathrm{ndim}}`
             as recommended by the two references.
+        threshold: (Optional[float]): the threshold value for adaptation. Should be _very_ low (e.g. `1e-32`).
     """
 
     def __init__(self, sigma=1.0e-5, gamma=None, threshold=0, verbose=False, **kwargs):
@@ -50,7 +51,7 @@ class ADEMove(RedBlueMove):
         return q, np.zeros(Ns, dtype=np.float64)
 
     def propose(self, model, state):
-        """Use the move to generate a proposal and compute the acceptance
+        """Use the move to generate a proposal and compute the acceptance, but adapted for use with ADEMove
         Args:
             coords: The initial coordinates of the walkers.
             log_probs: The initial log probabilities of the walkers.
