@@ -32,7 +32,7 @@ class ADEMove(RedBlueMove):
         if log_threshold and threshold:
             raise RuntimeError("Either provide `threshold` OR `log_threshold`.")
 
-        self.threshold = np.exp(log_threshold) if log_threshold else threshold
+        self.threshold = log_threshold if log_threshold else np.log(threshold)
 
         kwargs["nsplits"] = 3
         super(ADEMove, self).__init__(**kwargs)
@@ -99,7 +99,7 @@ class ADEMove(RedBlueMove):
 
             # adapt those that are extremely unlikely
             if self.threshold:
-                adapt = probs - probs[shuffled_inds] < np.log(self.threshold)
+                adapt = probs - probs[shuffled_inds] < self.threshold
 
             s = sets[split]
             if self.threshold:
