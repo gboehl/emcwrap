@@ -134,8 +134,8 @@ class ADEMove(RedBlueMove):
             new_state = State(q, log_prob=new_log_probs, blobs=new_blobs)
             state = self.update(state, new_state, accepted, S1)
 
-            # if self.verbose and sum(adapt):
-                # print(f'(ADEMove:) Accepted {sum(accepted[S1][adapt])} of {sum(adapt)} proposed adaptations in split {split}.')
+            if self.verbose and sum(adapt):
+                print(f"(ADEMove:) Accepted {sum(accepted[S1][adapt])} of {sum(adapt)} proposed adaptations in split {split}.")
 
         return state, accepted
 
