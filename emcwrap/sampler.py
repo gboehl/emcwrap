@@ -44,19 +44,22 @@ def run_mcmc(lprob, nsteps, p0=None, moves=None, priors=None, backend=None, upda
         report = report or pbar.write
 
     old_tau = np.inf
+    old_lls = np.array([-np.inf]*nwalks)
     cnt = 0
 
     for result in sampler.sample(p0, iterations=nsteps, **kwargs):
 
         if not verbose:
             lls = list(result)[1]
+            maf = 1-sum(lls == old_lls)/nwalks
             try:
-                maf = f"{np.mean(sampler.acceptance_fraction) * 100:2.0f}"
+                maf = f"{maf:2.0%}"
             except BlockingIOError:
                 maf = "??"
             pbar.set_description(
-                f"[ll/MAF:{np.max(lls):0.7f}({np.std(lls):1.0e})/{maf}%]"
+                f"[ll/MAF:{np.max(lls):0.7f}({np.std(lls):1.0e})/{maf}]"
             )
+            old_lls = lls.copy()
 
         if cnt and update_freq and not cnt % update_freq:
 
