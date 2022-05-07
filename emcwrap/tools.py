@@ -14,6 +14,7 @@ def get_prior(prior, verbose=False):
 
     prior_lst = []
     initv, lb, ub = [], [], []
+    funcs_con, func_re = (), () # prior-to-sampler, sampler-to-prior
 
     if verbose:
         print("Adding parameters to the prior distribution...")
@@ -53,6 +54,9 @@ def get_prior(prior, verbose=False):
             b = a * (1 / pmean - 1)
             prior_lst.append(ss.beta(a=a, b=b))
 
+            funcs_re += logit,
+            funcs_con += expit,
+
         elif str(ptype) == "inv_gamma":
 
             def targf(x):
@@ -77,6 +81,14 @@ def get_prior(prior, verbose=False):
         else:
             raise NotImplementedError(
                 f" Distribution {ptype} not implemented.")
+
+        if str(ptype) in ('gamma', 'inv_gamma', 'inv_gamma_dynare'):
+            funcs_re += np.log,
+            funcs_con += np.exp,
+        elif str(ptype) != 'beta':
+            funcs_re += lambda x: x,
+            funcs_con += lambda x: x,
+
         if verbose:
             if len(dist) == 3:
                 print(
@@ -89,7 +101,19 @@ def get_prior(prior, verbose=False):
                     % (pp, ptype, pmean, pstdd, dist[0], dist[1], dist[2])
                 )
 
-    return prior_lst, lambda x: log_prior(x, prior_lst), initv, (lb, ub)
+    def func_con(x):
+        res = x.copy()
+        for i,xi in enumerate(x):
+            res[i] = funcs_con[i](xi)
+        return res
+
+    def func_re(x):
+        res = x.copy()
+        for i,xi in enumerate(x):
+            res[i] = funcs_re[i](xi)
+        return res
+
+    return prior_lst, lambda x: log_prior(x, prior_lst), initv, (func_re, func_con), (lb, ub)
 
 
 def log_prior(par, frozen_prior):
