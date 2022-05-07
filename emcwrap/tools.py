@@ -113,7 +113,7 @@ def get_prior(prior, verbose=False):
             res[i] = funcs_re[i](xi)
         return res
 
-    return prior_lst, lambda x: log_prior(x, prior_lst), initv, (func_re, func_con), (lb, ub)
+    return prior_lst, lambda x: log_prior(x, prior_lst), (func_re, func_con), initv, (lb, ub)
 
 
 def log_prior(par, frozen_prior):
