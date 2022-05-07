@@ -14,7 +14,7 @@ def get_prior(prior, verbose=False):
 
     prior_lst = []
     initv, lb, ub = [], [], []
-    funcs_con, func_re = (), () # prior-to-sampler, sampler-to-prior
+    funcs_con, funcs_re = (), () # prior-to-sampler, sampler-to-prior
 
     if verbose:
         print("Adding parameters to the prior distribution...")
