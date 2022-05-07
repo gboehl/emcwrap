@@ -7,6 +7,7 @@ import numpy as np
 import scipy.stats as ss
 import scipy.optimize as so
 from grgrlib import parse_yaml
+from scipy.special import logit, expit
 from .dists import inv_gamma_spec, InvGammaDynare
 
 
