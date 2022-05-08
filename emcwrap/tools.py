@@ -12,6 +12,8 @@ from .dists import inv_gamma_spec, InvGammaDynare
 
 
 def get_prior(prior, verbose=False):
+    """Compile prior-related computational objects from a list of priors.
+    """
 
     prior_lst = []
     initv, lb, ub = [], [], []
@@ -102,25 +104,38 @@ def get_prior(prior, verbose=False):
                     % (pp, ptype, pmean, pstdd, dist[0], dist[1], dist[2])
                 )
 
+    return prior_lst, get_log_prior(prior_lst), get_bijective_prior_transformation(funcs_con, funcs_re), initv, (lb, ub)
+
+
+def get_log_prior(frozen_prior):
+    """Get the log-prior function.
+    """
+
+    def log_prior(par):
+
+        prior = 0
+        for i, pl in enumerate(frozen_prior):
+            prior += pl.logpdf(par[i])
+
+        return prior
+
+    return log_prior
+
+
+def get_bijective_prior_transformation(funcs_con, funcs_re):
+    """Get the bijective prior transformation function.
+    """
+
     def bijective_prior_transformation(x, sampler_to_prior=True):
 
         res = x.copy()
 
-        for i,xi in enumerate(x):
-            res[i] = funcs_con[i](xi) if sampler_to_prior else funcs_re[i](xi)
+        for i in range(x.shape[-1]):
+            res[...,i] = funcs_con[i](x[...,i]) if sampler_to_prior else funcs_re[i](x[...,i])
 
         return res
 
-    return prior_lst, lambda x: log_prior(x, prior_lst), bijective_prior_transformation, initv, (lb, ub)
-
-
-def log_prior(par, frozen_prior):
-
-    prior = 0
-    for i, pl in enumerate(frozen_prior):
-        prior += pl.logpdf(par[i])
-
-    return prior
+    return bijective_prior_transformation
 
 
 def find_mode_simple(lprob, init, frozen_prior, sd=True, verbose=False, **kwargs):
