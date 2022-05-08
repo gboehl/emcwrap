@@ -111,172 +111,6 @@ def get_axis(ax, default_rows, default_columns, **default_kwargs):
     return fig, ax
 
 
-def traceplot(
-    trace,
-    varnames,
-    tune,
-    figsize=None,
-    combined=False,
-    plots_per_fig=3,
-    frozen_prior=None,
-    draw_each_trace=True,
-    bw=4.5,
-    text_size=None,
-    display_additinal_info=False,
-    **kwargs
-):
-
-    # inspired by pymc3 with kisses
-
-    if figsize is None:
-        figsize = 9, plots_per_fig * 2.5
-
-    width = trace.shape[0]
-    tune = width - tune
-
-    def iterablator(x): return [x] if len(x) - 1 else x
-
-    if frozen_prior is None:
-        frozen_prior = [None] * len(varnames)
-
-    custom_lines_hist = [
-        Line2D([0], [0], linestyle="-", color="C0", lw=1),
-        Line2D([0], [0], linestyle="--", color="C1", lw=1),
-    ]
-
-    custom_lines_trace = [
-        Line2D([0], [0], linestyle="-", color="maroon", lw=1),
-        Line2D([0], [0], linestyle="-", color="C0", lw=1),
-    ]
-
-    axs = []
-    figs = []
-    subfigs = []
-
-    for chunk in range(0, len(varnames), plots_per_fig):
-
-        eff_ppf = min(plots_per_fig, len(varnames[chunk:]))
-        eff_figsize = figsize[0], figsize[1] * eff_ppf / plots_per_fig
-
-        figs.append(plt.figure(constrained_layout=True, figsize=eff_figsize))
-        subfig = figs[-1].subfigures(eff_ppf, 1, wspace=0.07)
-
-        if eff_ppf == 1:
-            subfig = [subfig]
-
-        subfigs.append(subfig)
-
-        for i in range(eff_ppf):
-
-            axs.append(subfigs[-1][i].subplots(1, 2))
-            data = trace[..., chunk + i]
-
-            posterior = data[-tune:].flatten()
-            plot_posterior_op(
-                posterior,
-                ax=axs[-1][0],
-                bw=bw,
-                prior=frozen_prior[chunk + i],
-                text_size=scale_text(figsize, text_size),
-                display_additinal_info=display_additinal_info,
-                **kwargs
-            )
-            if draw_each_trace:
-                axs[-1][1].plot(
-                    range(0, tune + 1), data[: tune + 1], c="maroon", alpha=0.03
-                )
-                axs[-1][1].plot(range(tune, width),
-                                data[tune:], c="C0", alpha=0.045)
-                axs[-1][1].plot(
-                    [tune, tune],
-                    [
-                        np.mean(data, 1)[tune] - np.std(data, 1)[tune] * 3,
-                        np.mean(data, 1)[tune] + np.std(data, 1)[tune] * 3,
-                    ],
-                    "--",
-                    alpha=0.4,
-                    color="k",
-                )
-
-            else:
-                i95s = np.percentile(data, [2.5, 97.5], axis=1)
-                i66s = np.percentile(data, [17, 83], axis=1)
-                means = np.mean(data, axis=1)
-                medis = np.median(data, axis=1)
-
-                axs[-1][1].fill_between(
-                    range(0, tune + 1),
-                    *i95s[:, : tune + 1],
-                    lw=0,
-                    alpha=0.1,
-                    color="C1"
-                )
-                axs[-1][1].fill_between(
-                    range(tune, width), *i95s[:, tune:], lw=0, alpha=0.2, color="C1"
-                )
-                axs[-1][1].fill_between(
-                    range(0, tune + 1),
-                    *i66s[:, : tune + 1],
-                    lw=0,
-                    alpha=0.3,
-                    color="C1"
-                )
-                axs[-1][1].fill_between(
-                    range(tune, width), *i66s[:, tune:], lw=0, alpha=0.4, color="C1"
-                )
-                axs[-1][1].plot(range(tune, width), means[tune:], lw=2, c="C0")
-                axs[-1][1].plot(
-                    range(0, tune + 1), means[: tune + 1], lw=2, c="C0", alpha=0.5
-                )
-
-                axs[-1][1].plot(
-                    [tune, tune],
-                    [
-                        np.mean(data, 1)[tune] - np.std(data, 1)[tune] * 3,
-                        np.mean(data, 1)[tune] + np.std(data, 1)[tune] * 3,
-                    ],
-                    "--",
-                    alpha=0.4,
-                    color="k",
-                )
-
-            axs[-1][0].tick_params(
-                axis="x",
-                direction="out",
-                width=1,
-                length=3,
-                color="0.5",
-                labelsize=scale_text(figsize, text_size),
-            )
-            axs[-1][1].tick_params(
-                axis="x",
-                direction="out",
-                width=1,
-                length=3,
-                color="0.5",
-                labelsize=scale_text(figsize, text_size),
-            )
-            axs[-1][1].tick_params(
-                axis="y",
-                width=1,
-                length=0,
-                color="0.5",
-                labelsize=scale_text(figsize, text_size),
-            )
-
-            axs[-1][0].set_ylabel("Frequency")
-            axs[-1][1].set_ylabel("Sample value")
-            axs[-1][0].set_ylim(bottom=0)
-
-            subfigs[-1][i].suptitle(str(varnames[chunk + i]))
-
-        if frozen_prior[chunk] is not None:
-            axs[-1][0].legend(custom_lines_hist, ["Posterior", "Prior"])
-            axs[-1][1].legend(custom_lines_trace, ["Burn-in", "Posterior"])
-
-    return figs, subfigs, axs
-
-
 def plot_posterior_op(
     trace_values,
     ax,
@@ -532,3 +366,165 @@ def posteriorplot(
         figs.append(fig)
 
     return figs, axs
+
+
+def traceplot(
+    trace,
+    varnames,
+    tune,
+    figsize=None,
+    plots_per_fig=3,
+    frozen_prior=None,
+    draw_each_trace=True,
+    bw=4.5,
+    text_size=None,
+    **kwargs
+):
+
+    # inspired by pymc3 with kisses
+
+    if figsize is None:
+        figsize = 9, plots_per_fig * 2.5
+
+    width = trace.shape[0]
+
+    if frozen_prior is None:
+        frozen_prior = [None] * len(varnames)
+
+    custom_lines_hist = [
+        Line2D([0], [0], linestyle="-", color="C0", lw=1),
+        Line2D([0], [0], linestyle="--", color="C1", lw=1),
+    ]
+
+    custom_lines_trace = [
+        Line2D([0], [0], linestyle="-", color="maroon", lw=1),
+        Line2D([0], [0], linestyle="-", color="C0", lw=1),
+    ]
+
+    axs = []
+    figs = []
+    subfigs = []
+
+    for chunk in range(0, len(varnames), plots_per_fig):
+
+        eff_ppf = min(plots_per_fig, len(varnames[chunk:]))
+        eff_figsize = figsize[0], figsize[1] * eff_ppf / plots_per_fig
+
+        figs.append(plt.figure(constrained_layout=True, figsize=eff_figsize))
+        subfig = figs[-1].subfigures(eff_ppf, 1, wspace=0.07)
+
+        if eff_ppf == 1:
+            subfig = [subfig]
+
+        subfigs.append(subfig)
+
+        for i in range(eff_ppf):
+
+            axs.append(subfigs[-1][i].subplots(1, 2))
+            data = trace[..., chunk + i]
+
+            posterior = data[-tune:].flatten()
+            plot_posterior_op(
+                posterior,
+                ax=axs[-1][0],
+                bw=bw,
+                prior=frozen_prior[chunk + i],
+                text_size=scale_text(figsize, text_size),
+                **kwargs
+            )
+            if draw_each_trace:
+                axs[-1][1].plot(
+                    range(0, width - tune + 1), data[: - tune + 1], c="maroon", alpha=0.03
+                )
+                axs[-1][1].plot(range(width - tune, width),
+                                data[- tune:], c="C0", alpha=0.045)
+                axs[-1][1].plot(
+                    [width - tune, width - tune],
+                    [
+                        np.mean(data, 1)[- tune] - np.std(data, 1)[- tune] * 3,
+                        np.mean(data, 1)[- tune] + np.std(data, 1)[- tune] * 3,
+                    ],
+                    "--",
+                    alpha=0.4,
+                    color="k",
+                )
+
+            else:
+                i95s = np.percentile(data, [2.5, 97.5], axis=1)
+                i66s = np.percentile(data, [17, 83], axis=1)
+                means = np.mean(data, axis=1)
+                medis = np.median(data, axis=1)
+
+                axs[-1][1].fill_between(
+                    range(0, width - tune + 1),
+                    *i95s[:, : - tune + 1],
+                    lw=0,
+                    alpha=0.1,
+                    color="C1"
+                )
+                axs[-1][1].fill_between(
+                    range(width - tune, width), *i95s[:, - tune:], lw=0, alpha=0.2, color="C1"
+                )
+                axs[-1][1].fill_between(
+                    range(0, width - tune + 1),
+                    *i66s[:, : - tune + 1],
+                    lw=0,
+                    alpha=0.3,
+                    color="C1"
+                )
+                axs[-1][1].fill_between(
+                    range(width - tune, width), *i66s[:, - tune:], lw=0, alpha=0.4, color="C1"
+                )
+                axs[-1][1].plot(range(width - tune, width), means[- tune:], lw=2, c="C0")
+                axs[-1][1].plot(
+                    range(0, width - tune + 1), means[: - tune + 1], lw=2, c="C0", alpha=0.5
+                )
+
+                axs[-1][1].plot(
+                    [width - tune, width - tune],
+                    [
+                        np.mean(data, 1)[- tune] - np.std(data, 1)[- tune] * 3,
+                        np.mean(data, 1)[- tune] + np.std(data, 1)[- tune] * 3,
+                    ],
+                    "--",
+                    alpha=0.4,
+                    color="k",
+                )
+
+            axs[-1][0].tick_params(
+                axis="x",
+                direction="out",
+                width=1,
+                length=3,
+                color="0.5",
+                labelsize=scale_text(figsize, text_size),
+            )
+            axs[-1][1].tick_params(
+                axis="x",
+                direction="out",
+                width=1,
+                length=3,
+                color="0.5",
+                labelsize=scale_text(figsize, text_size),
+            )
+            axs[-1][1].tick_params(
+                axis="y",
+                width=1,
+                length=0,
+                color="0.5",
+                labelsize=scale_text(figsize, text_size),
+            )
+
+            axs[-1][0].set_ylabel("Frequency")
+            axs[-1][1].set_ylabel("Sample value")
+            axs[-1][0].set_ylim(bottom=0)
+
+            subfigs[-1][i].suptitle(str(varnames[chunk + i]))
+
+        if frozen_prior[chunk] is not None:
+            axs[-1][0].legend(custom_lines_hist, ["Posterior", "Prior"])
+            axs[-1][1].legend(custom_lines_trace, ["Burn-in", "Posterior"])
+
+    return figs, subfigs, axs
+
+

@@ -102,19 +102,16 @@ def get_prior(prior, verbose=False):
                     % (pp, ptype, pmean, pstdd, dist[0], dist[1], dist[2])
                 )
 
-    def func_con(x):
+    def bijective_prior_transformation(x, sampler_to_prior=True):
+
         res = x.copy()
+
         for i,xi in enumerate(x):
-            res[i] = funcs_con[i](xi)
+            res[i] = funcs_con[i](xi) if sampler_to_prior else funcs_re[i](xi)
+
         return res
 
-    def func_re(x):
-        res = x.copy()
-        for i,xi in enumerate(x):
-            res[i] = funcs_re[i](xi)
-        return res
-
-    return prior_lst, lambda x: log_prior(x, prior_lst), (func_re, func_con), initv, (lb, ub)
+    return prior_lst, lambda x: log_prior(x, prior_lst), bijective_prior_transformation, initv, (lb, ub)
 
 
 def log_prior(par, frozen_prior):
