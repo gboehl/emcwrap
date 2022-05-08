@@ -10,12 +10,15 @@ from grgrlib import map2arr
 from .stats import summary
 
 
-def run_mcmc(lprob, nsteps, p0=None, moves=None, priors=None, backend=None, update_freq=None, resume=False, pool=None, report=None, description=None, temp=1, maintenance_interval=False, seed=None, verbose=False, **kwargs):
+def run_mcmc(lprob, nsteps, p0=None, moves=None, priors=None, backend=None, update_freq=None, prior_transform=None, resume=False, pool=None, report=None, description=None, temp=1, maintenance_interval=False, seed=None, verbose=False, **kwargs):
     """Run the emcee sampler.
     """
 
     if seed is None:
         seed = 0
+
+    if prior_transform is None:
+        prior_transform = lambda x: x
 
     np.random.seed(seed)
 
@@ -85,7 +88,7 @@ def run_mcmc(lprob, nsteps, p0=None, moves=None, priors=None, backend=None, upda
 
             if priors is not None:
                 mcmc_summary(
-                    chain=sample[-update_freq:],
+                    chain=prior_transform(sample[-update_freq:]),
                     lprobs=lprobs[-update_freq:],
                     priors=priors,
                     acceptance_fraction=acfs[-update_freq:],
