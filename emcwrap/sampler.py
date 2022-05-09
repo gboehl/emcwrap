@@ -10,7 +10,7 @@ from grgrlib import map2arr
 from .stats import summary
 
 
-def run_mcmc(lprob, nsteps, p0=None, moves=None, priors=None, backend=None, update_freq=None, prior_transform=None, resume=False, pool=None, report=None, description=None, temp=1, maintenance_interval=False, seed=None, verbose=False, **kwargs):
+def run_mcmc(lprob, nsteps, p0=None, moves=None, priors=None, prior_transform=None, backend=None, update_freq=None, resume=False, pool=None, report=None, description=None, temp=1, maintenance_interval=False, seed=None, verbose=False, **kwargs):
     """Run the emcee sampler.
     """
 

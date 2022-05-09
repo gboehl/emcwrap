@@ -128,6 +128,7 @@ def get_bijective_prior_transformation(funcs_con, funcs_re):
 
     def bijective_prior_transformation(x, sampler_to_prior=True):
 
+        x = np.array(x)
         res = x.copy()
 
         for i in range(x.shape[-1]):
