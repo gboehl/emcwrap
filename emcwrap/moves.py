@@ -31,9 +31,11 @@ class ADEMove(RedBlueMove):
         self.verbose = verbose
 
         if log_threshold and threshold:
-            raise RuntimeError("Either provide `threshold` OR `log_threshold`.")
+            raise RuntimeError(
+                "Either provide `threshold` OR `log_threshold`.")
 
-        log_threshold_from_threshold = np.log(threshold) if threshold else -np.inf
+        log_threshold_from_threshold = np.log(
+            threshold) if threshold else -np.inf
         self.log_threshold = log_threshold if log_threshold else log_threshold_from_threshold
 
         kwargs["nsplits"] = 3
@@ -78,7 +80,6 @@ class ADEMove(RedBlueMove):
             )
 
         if not walkers_independent(state.coords):
-            print('hier! Problem!')
             raise ValueError(
                 "Current state has a large condition number. "
                 "Make sure that your walkers are linearly independent for the "
@@ -95,13 +96,15 @@ class ADEMove(RedBlueMove):
         if self.randomize_split:
             model.random.shuffle(inds)
 
+        prop_adapts, accept_adapts = 0, 0
+
         for split in range(self.nsplits):
             S1 = inds == split
 
             # Get the splits of the ensemble.
             sets = [state.coords[inds == j] for j in range(self.nsplits)]
 
-            # Get probs 
+            # Get probs
             probs = state.log_prob[S1]
 
             # compare each walker _within_ split
@@ -112,7 +115,7 @@ class ADEMove(RedBlueMove):
             adapt = probs - probs[shuffled_inds] < self.log_threshold
 
             s = sets[split]
-            # get proposal for adapted walker. 
+            # get proposal for adapted walker.
             # if proposal is rejected, nothing will happen
             s[adapt] = s[shuffled_inds][adapt]
             c = sets[:split] + sets[split + 1:]
@@ -134,8 +137,12 @@ class ADEMove(RedBlueMove):
             new_state = State(q, log_prob=new_log_probs, blobs=new_blobs)
             state = self.update(state, new_state, accepted, S1)
 
-            if self.verbose and sum(adapt):
-                print(f"(ADEMove:) Accepted {sum(accepted[S1][adapt])} of {sum(adapt)} proposed adaptations in split {split}.")
+            prop_adapts += sum(adapt)
+            accept_adapts += sum(accepted[S1][adapt])
+
+        if self.verbose and prop_adapts:
+            print(
+                f"(ADEMove:) Accepted {accept_adapts} of {prop_adapts} proposed adaptations in split {split}.")
 
         return state, accepted
 
@@ -218,7 +225,7 @@ class DEMove(RedBlueMove):
             # Get the two halves of the ensemble.
             sets = [state.coords[inds == j] for j in range(self.nsplits)]
             s = sets[split]
-            c = sets[:split] + sets[split + 1 :]
+            c = sets[:split] + sets[split + 1:]
 
             # Get the move-specific proposal.
             q, factors = self.get_proposal(s, c, model.random)
