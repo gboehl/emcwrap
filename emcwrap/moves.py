@@ -143,6 +143,6 @@ class ADEMove(RedBlueMove):
 
         if self.verbose and prop_adapts:
             print(
-                f"(ADEMove:) Accepted {accept_adapts} of {prop_adapts} proposed adaptations.")
+                f"(ADEMove:) Accepted {accept_adapts} of {prop_adapts} proposed adaptation(s).")
 
         return state, accepted
