@@ -54,11 +54,6 @@ html_theme = 'alabaster'
 html_static_path = ['_static']
 autodoc_mock_imports = ['tqdm', 'emcee', 'numpy', 'scipy', 'grgrlib', 'pandas', 'matplotlib', 'numdifftools']
 
-def setup(app):
-    app.add_stylesheet('css/custom.css')
-
-master_doc = 'index'
-
 html_theme_options = {
     "description": "Tools for Bayesian inference using Enseble MCMC",
     "github_button": True,
