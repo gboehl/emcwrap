@@ -10,6 +10,5 @@
 
    readme
    tutorial
-   boehl_hommes
    modules
    indices
