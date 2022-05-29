@@ -2,7 +2,7 @@ Module Documentation
 ====================
 
 ``emcwrap.sampler``
-------------------
+-------------------
 .. automodule:: emcwrap.sampler
    :members:
    :undoc-members:
