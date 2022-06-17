@@ -6,3 +6,5 @@ from .tools import *
 from .stats import *
 from .plots import *
 from .moves import *
+
+__version__ = '0.1.3'
