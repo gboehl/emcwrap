@@ -32,6 +32,6 @@ setup(
         "pandas",
         "numdifftools",
         "matplotlib",
-        "grgrlib>=0.1.3",
+        "grgrlib>=0.1.15",
     ],
 )

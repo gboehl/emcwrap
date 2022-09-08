@@ -5,7 +5,7 @@ import warnings
 import numpy as np
 import pandas as pd
 import scipy.stats as ss
-from grgrlib.stats import logpdf
+from grgrlib.njitted import mvn_logpdf as logpdf
 
 
 def mdd_laplace(chain, lprobs, calc_hess=False):
