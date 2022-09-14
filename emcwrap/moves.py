@@ -7,8 +7,6 @@ from emcee.moves.de import DEMove
 from emcee.state import State
 from emcee.ensemble import walkers_independent
 
-__all__ = ["ADEMove", "DEMove"]
-
 
 class ADEMove(RedBlueMove):
     r"""A proposal using adaptive differential evolution following
@@ -146,3 +144,61 @@ class ADEMove(RedBlueMove):
                 f"(ADEMove:) Accepted {accept_adapts} of {prop_adapts} proposed adaptation(s).")
 
         return state, accepted
+
+class XDEMove(RedBlueMove):
+    r"""A proposal using differential evolution.
+
+    This `Differential evolution proposal
+    <http://www.stat.columbia.edu/~gelman/stuff_for_blog/cajo.pdf>`_ is
+    implemented following `Nelson et al. (2013)
+    <https://arxiv.org/abs/1311.5229>`_.
+
+    Args:
+        sigma (float): The standard deviation of the Gaussian used to stretch
+            the proposal vector.
+        gamma0 (Optional[float]): The mean stretch factor for the proposal
+            vector. By default, it is :math:`2.38 / \sqrt{2\,\mathrm{ndim}}`
+            as recommended by the two references.
+
+    """
+
+    def __init__(self, sigma=1.0e-5, gamma0=None, **kwargs):
+        self.sigma = sigma
+        self.gamma0 = gamma0
+        kwargs["nsplits"] = 1
+        super(XDEMove, self).__init__(**kwargs)
+
+    def setup(self, coords):
+        self.g0 = self.gamma0
+        if self.g0 is None:
+            # Pure MAGIC:
+            ndim = coords.shape[1]
+            self.g0 = 2.38 / np.sqrt(2 * ndim)
+
+    def get_proposal(self, x, dummy, random):
+
+        from scipy.spatial.distance import mahalanobis
+        # calculate distribution stats
+        mean = np.mean(x, axis=0)
+        cov = np.cov(x.T)
+        N = len(x)
+        P = cov.shape[0]
+        # calculate squared Mahalanobis distances
+        # einsum is probably the most efficient way 
+        d2s = np.einsum('ij,ji->i', (x - mean) @ np.linalg.inv(cov), (x - mean).T)
+        # print(d2s)
+        # print(np.min(P/d2s))
+        # lev = d2s/(N - 1) + 1/N
+        # print(lev)
+        # print(2*P/N)
+        # TODO: calculate outliers
+        # TODO: substitute outliers for sample from Gaussian distribution
+
+        i0 = np.arange(N) + random.randint(N-1, size=N)
+        i1 = np.arange(N) + random.randint(N-2, size=N)
+        i1[i1 >= i0] += 1
+        f = self.sigma * random.randn(N)
+        q = x + self.g0*(x[i0 % N] - x[i1 % N]) + f[:,np.newaxis]
+
+        return q, np.zeros(N, dtype=np.float64)
+
