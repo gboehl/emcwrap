@@ -50,10 +50,7 @@ def run_mcmc(lprob, nsteps, p0=None, moves=None, priors=None, prior_transform=No
     old_lls = np.array([-np.inf]*nwalks)
     cnt = 0
 
-    sampler.run_mcmc(p0, nsteps, **kwargs)
-    """
     for result in sampler.sample(p0, iterations=nsteps, **kwargs):
-    # for result in sampler.sample(p0, iterations=nsteps):
 
         if not verbose:
             lls = list(result)[1]
@@ -63,7 +60,7 @@ def run_mcmc(lprob, nsteps, p0=None, moves=None, priors=None, prior_transform=No
             except BlockingIOError:
                 maf = "??"
             pbar.set_description(
-                f"[ll/MAF:{np.max(lls):0.7f}({np.std(lls):1.0e})/{maf}]"
+                f"[ll/MAF:{np.max(lls):0.3f}({np.std(lls):1.0e})/{maf}]"
             )
             old_lls = lls.copy()
 
@@ -81,8 +78,7 @@ def run_mcmc(lprob, nsteps, p0=None, moves=None, priors=None, prior_transform=No
 
             sample = sampler.get_chain()
             lprobs = sampler.get_log_prob(flat=True)
-            # acfs = sampler.acceptance_fraction
-            acfs = np.ones(update_freq*2)
+            acfs = sampler.acceptance_fraction
 
             tau = emcee.autocorr.integrated_time(sample, tol=0, c=10)
             min_tau = np.min(tau).round(2)
@@ -113,7 +109,6 @@ def run_mcmc(lprob, nsteps, p0=None, moves=None, priors=None, prior_transform=No
             pool.clear()
 
         cnt += 1
-        """
 
     pbar.close()
     if pool:
