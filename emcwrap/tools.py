@@ -69,7 +69,7 @@ def get_prior(prior, verbose=False):
             ig_res = so.root(targf, np.array([4, 4]), method="lm")
 
             if ig_res["success"] and np.allclose(targf(ig_res["x"]), 0):
-                ndist = ss.invgamma(ig_res["x"][0], scale=ig_res["x"][1]),
+                ndist = ss.invgamma(ig_res["x"][0], scale=ig_res["x"][1])
             else:
                 raise ValueError(
                     f"Can not find inverse gamma distribution with mean {pmean} and std {pstdd}.")
