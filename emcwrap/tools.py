@@ -15,9 +15,11 @@ def get_prior(prior, verbose=False):
     """Compile prior-related computational objects from a list of priors.
     """
 
-    prior_lst = []
+    prior_lst = ()
     initv, lb, ub = [], [], []
     funcs_con, funcs_re = (), () # prior-to-sampler, sampler-to-prior
+
+    snorm = ss.norm()
 
     if verbose:
         print("Adding parameters to the prior distribution...")
@@ -42,23 +44,20 @@ def get_prior(prior, verbose=False):
 
         # simply make use of frozen distributions
         if str(ptype) == "uniform":
-            prior_lst.append(ss.uniform(loc=pmean, scale=pstdd - pmean))
+            ndist = ss.uniform(loc=pmean, scale=pstdd - pmean)
 
         elif str(ptype) == "normal":
-            prior_lst.append(ss.norm(loc=pmean, scale=pstdd))
+            ndist = ss.norm(loc=pmean, scale=pstdd)
 
         elif str(ptype) == "gamma":
             b = pstdd ** 2 / pmean
             a = pmean / b
-            prior_lst.append(ss.gamma(a, scale=b))
+            ndist = ss.gamma(a, scale=b)
 
         elif str(ptype) == "beta":
             a = (1 - pmean) * pmean ** 2 / pstdd ** 2 - pmean
             b = a * (1 / pmean - 1)
-            prior_lst.append(ss.beta(a=a, b=b))
-
-            funcs_re += logit,
-            funcs_con += expit,
+            ndist = ss.beta(a=a, b=b)
 
         elif str(ptype) == "inv_gamma":
 
@@ -70,25 +69,27 @@ def get_prior(prior, verbose=False):
             ig_res = so.root(targf, np.array([4, 4]), method="lm")
 
             if ig_res["success"] and np.allclose(targf(ig_res["x"]), 0):
-                prior_lst.append(ss.invgamma(
-                    ig_res["x"][0], scale=ig_res["x"][1]))
+                ndist = ss.invgamma(ig_res["x"][0], scale=ig_res["x"][1]),
             else:
                 raise ValueError(
                     f"Can not find inverse gamma distribution with mean {pmean} and std {pstdd}.")
 
         elif str(ptype) == "inv_gamma_dynare":
             s, nu = inv_gamma_spec(pmean, pstdd)
-            ig = InvGammaDynare()(s, nu)
-            prior_lst.append(ig)
+            ndist = InvGammaDynare()(s, nu)
 
         else:
             raise NotImplementedError(
                 f" Distribution {ptype} not implemented.")
 
-        if str(ptype) in ('gamma', 'inv_gamma', 'inv_gamma_dynare'):
+        prior_lst += ndist,
+        if str(ptype) in ('gamma', 'inv_gamma', 'beta'):
+            funcs_re += lambda x: snorm.ppf(ndist.cdf(x)),
+            funcs_con += lambda x: ndist.ppf(snorm.cdf(x)),
+        elif str(ptype) == 'inv_gamma_dynare':
             funcs_re += np.log,
             funcs_con += np.exp,
-        elif str(ptype) != 'beta':
+        else:
             funcs_re += lambda x: x,
             funcs_con += lambda x: x,
 
@@ -104,7 +105,7 @@ def get_prior(prior, verbose=False):
                     % (pp, ptype, pmean, pstdd, dist[0], dist[1], dist[2])
                 )
 
-    return prior_lst, get_log_prior(prior_lst), get_bijective_prior_transformation(funcs_con, funcs_re), initv, (lb, ub)
+    return list(prior_lst), get_log_prior(prior_lst), get_bijective_prior_transformation(funcs_con, funcs_re), initv, (lb, ub)
 
 
 def get_log_prior(frozen_prior):

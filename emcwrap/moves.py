@@ -203,7 +203,7 @@ class XDEMove(RedBlueMove):
         x[outbool] = xchange
 
         if self.verbose and sum(outbool):
-            print(f"[ADEMove:] resampling {sum(outbool)} draw(s) with smallest prob. < {min(maxprobs[outbool]):.2%}.")
+            print(f"[ADEMove:] resampling {sum(outbool)} draw(s) with (smallest) prob. < {min(maxprobs[outbool]):.2%}.")
 
         i0 = np.arange(ndim) + random.randint(ndim-1, size=ndim)
         i1 = np.arange(ndim) + random.randint(ndim-2, size=ndim)
