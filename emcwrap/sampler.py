@@ -5,7 +5,6 @@ import os
 import sys
 import tqdm
 import emcee
-import zeus
 import numpy as np
 from grgrlib import map2arr
 from .stats import summary
@@ -19,7 +18,7 @@ def run_mcmc(lprob, nsteps, p0=None, moves=None, priors=None, prior_transform=No
         seed = 0
 
     if prior_transform is None:
-        prior_transform = lambda x: x
+        def prior_transform(x): return x
 
     np.random.seed(seed)
 
@@ -35,10 +34,8 @@ def run_mcmc(lprob, nsteps, p0=None, moves=None, priors=None, prior_transform=No
     if update_freq is None:
         update_freq = nsteps // 5
 
-    # sampler = emcee.EnsembleSampler(
-        # nwalks, ndim, lprob, moves=moves, pool=pool, backend=backend)
-    # sampler = zeus.EnsembleSampler(nwalks, ndim, lprob, pool=pool, **kwargs)
-    sampler = zeus.EnsembleSampler(nwalks, ndim, lprob, pool=pool)
+    sampler = emcee.EnsembleSampler(
+        nwalks, ndim, lprob, moves=moves, pool=pool, backend=backend)
 
     if not verbose:  # verbose means VERY verbose
         np.warnings.filterwarnings("ignore")
@@ -52,7 +49,6 @@ def run_mcmc(lprob, nsteps, p0=None, moves=None, priors=None, prior_transform=No
     old_tau = np.inf
     old_lls = np.array([-np.inf]*nwalks)
     cnt = 0
-
 
     sampler.run_mcmc(p0, nsteps, **kwargs)
     """
