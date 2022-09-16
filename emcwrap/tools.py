@@ -83,15 +83,15 @@ def get_prior(prior, verbose=False):
                 f" Distribution {ptype} not implemented.")
 
         prior_lst += ndist,
-        if str(ptype) == 'inv_gamma_dynare':
+        if str(ptype) in ('gamma', 'inv_gamma', 'inv_gamma_dynare'):
             funcs_re += np.log,
             funcs_con += np.exp,
-        elif str(ptype) == 'normal':
+        elif str(ptype) == 'beta':
+            funcs_re += logit,
+            funcs_con += expit,
+        else:
             funcs_re += lambda x: x,
             funcs_con += lambda x: x,
-        else:
-            funcs_re += lambda x: snorm.ppf(ndist.cdf(x)),
-            funcs_con += lambda x: ndist.ppf(snorm.cdf(x)),
 
         if verbose:
             if len(dist) == 3:
