@@ -200,9 +200,7 @@ def load_backend(backend):
 
 def remove_backend(backend):
     """just a shortcut"""
-
     os.remove(backend)
-
     return
 
 

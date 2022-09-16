@@ -20,27 +20,41 @@ class ADEMove(RedBlueMove):
         verbose: (Optional[bool]): print message whenever chains are exchanged.
     """
 
-    def __init__(self, sigma=1.0e-5, gamma=None, threshold=None, verbose=False, **kwargs):
+    def __init__(self, sigma=1.0e-5, gamma=None, target=0.15, sma_decay=.7, verbose=False, **kwargs):
         self.sigma = sigma
         self.gamma = gamma
-        self.delta = threshold
+        self.target = target
+        self.sma_decay = sma_decay
         self.verbose = verbose
+
+        self.naccepted = None
+        self.state = None
+        self.sma = None
+
         kwargs["nsplits"] = 1
         super(ADEMove, self).__init__(**kwargs)
 
     def setup(self, coords):
+
+        ndim, npar = coords.shape
+
         self.g0 = self.gamma
-        self.d0 = self.delta
-        npar, ndim = coords.shape
 
         if self.g0 is None:
-            # pure MAGIC:
-            self.g0 = 2.38 / np.sqrt(2 * ndim)
+            # pure MAGIC
+            self.g0 = 2.38 / np.sqrt(2 * npar)
 
-        if self.d0 is None:
-            # more MAGIC: 
-            # a rather conservative default
-            self.d0 = npar*ndim/(3*npar - 1)/(ndim - 1)
+        if self.sma is None:
+            # more MAGIC
+            self.sma = self.target*ndim
+
+
+    def propose(self, model, state):
+        state, accepted = super(ADEMove, self).propose(model, state)
+        # self.accepance_fraction = sum(accepted)/len(accepted)
+        self.naccepted = sum(accepted)
+        self.state = state
+        return state, accepted
 
     def get_proposal(self, x, dummy, random):
 
@@ -49,19 +63,21 @@ class ADEMove(RedBlueMove):
         mean = np.mean(x, axis=0)
         cov = np.cov(x.T)
 
-        # calculate squared Mahalanobis distances
-        # einsum is probably the most efficient way to do this
-        d2s = np.einsum('ij,ji->i', (x - mean) @ np.linalg.inv(cov), (x - mean).T)
-        maxprobs = npar/d2s
+        # get ndraws
+        if self.state is not None:
+            # decaying MA
+            self.sma = self.sma_decay*self.sma + (1 - self.sma_decay)*self.naccepted
+            sortinds = np.argsort(self.state.log_prob)
+            ndraws = max(0, int(self.target*ndim - self.sma))
+        else:
+            ndraws = 0
 
-        # calculate outliers
-        outbool = maxprobs < self.d0
-        xchange = random.multivariate_normal(mean, cov, size=sum(outbool))
-        # substitute outliers for sample from Gaussian distribution
-        x[outbool] = xchange
+        if ndraws:
+            xchange = random.multivariate_normal(mean, cov, size=ndraws)
+            x[sortinds[:ndraws]] = xchange
 
-        if self.verbose and sum(outbool):
-            print(f"[ADEMove:] resampling {sum(outbool)} draw(s) with (smallest) prob. < {min(maxprobs[outbool]):.2%}.")
+        if self.verbose and ndraws:
+            print(f"[ADEMove:] resampling {ndraws} draw(s)/ MA-AF: {self.sma/ndim:0.2%}.")
 
         i0 = np.arange(ndim) + random.randint(ndim-1, size=ndim)
         i1 = np.arange(ndim) + random.randint(ndim-2, size=ndim)
