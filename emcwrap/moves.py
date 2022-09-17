@@ -20,10 +20,13 @@ class ADEMove(RedBlueMove):
         verbose: (Optional[bool]): print message whenever chains are exchanged.
     """
 
-    def __init__(self, sigma=1.0e-5, gamma=None, target=0.15, sma_decay=.7, verbose=False, **kwargs):
+    def __init__(self, sigma=1.0e-5, gamma=None, target=0.18, threshold=None, sma_decay=.8, verbose=False, **kwargs):
+
         self.sigma = sigma
         self.gamma = gamma
+        # for a gaussian posterior the expected acceptance ratio is 0.23 if the dimensionality is large
         self.target = target
+        self.threshold = threshold
         self.sma_decay = sma_decay
         self.verbose = verbose
 
@@ -39,6 +42,7 @@ class ADEMove(RedBlueMove):
         ndim, npar = coords.shape
 
         self.g0 = self.gamma
+        self.d0 = self.threshold
 
         if self.g0 is None:
             # pure MAGIC
@@ -48,10 +52,13 @@ class ADEMove(RedBlueMove):
             # more MAGIC
             self.sma = self.target*ndim
 
+        if self.d0 is None:
+            # even more MAGIC
+            self.d0 = npar*ndim/(3*npar - 1)/(ndim - 1)
 
     def propose(self, model, state):
+        # wrap original propose
         state, accepted = super(ADEMove, self).propose(model, state)
-        # self.accepance_fraction = sum(accepted)/len(accepted)
         self.naccepted = sum(accepted)
         self.state = state
         return state, accepted
@@ -60,24 +67,39 @@ class ADEMove(RedBlueMove):
 
         # calculate distribution stats
         ndim, npar = x.shape
-        mean = np.mean(x, axis=0)
-        cov = np.cov(x.T)
 
         # get ndraws
         if self.state is not None:
-            # decaying MA
+            # weighted MA
             self.sma = self.sma_decay*self.sma + (1 - self.sma_decay)*self.naccepted
             sortinds = np.argsort(self.state.log_prob)
             ndraws = max(0, int(self.target*ndim - self.sma))
         else:
+            sortinds = np.arange(ndim)
             ndraws = 0
 
-        if ndraws:
-            xchange = random.multivariate_normal(mean, cov, size=ndraws)
-            x[sortinds[:ndraws]] = xchange
+        xleft = x[sortinds[ndraws:]]
+
+        # calculate distribution stats for remaining chains
+        mean = np.mean(xleft, axis=0)
+        cov = np.cov(xleft.T)
+
+        # calculate squared Mahalanobis distances
+        # einsum is probably the most efficient way to do this
+        d2s = np.einsum('ij,ji->i', (xleft - mean) @ np.linalg.inv(cov), (xleft - mean).T)
+        maxprobs = npar/d2s
+        # calculate "outliers"
+        outbool = maxprobs < self.d0
+
+        if ndraws or sum(outbool):
+            mean = np.mean(xleft[~outbool], axis=0)
+            cov = np.cov(xleft[~outbool].T)
+            xchange = random.multivariate_normal(mean, cov, size=ndraws+sum(outbool))
+            x[sortinds[:ndraws]] = xchange[:ndraws]
+            x[sortinds[ndraws:][outbool]] = xchange[ndraws:]
 
         if self.verbose and ndraws:
-            print(f"[ADEMove:] resampling {ndraws} draw(s)/ MA-AF: {self.sma/ndim:0.2%}.")
+            print(f"[ADEMove:] resampling {ndraws+sum(outbool)} draw(s) ({sum(outbool)} with high leverage); MA-AF: {self.sma/ndim:0.2%}.")
 
         i0 = np.arange(ndim) + random.randint(ndim-1, size=ndim)
         i1 = np.arange(ndim) + random.randint(ndim-2, size=ndim)
