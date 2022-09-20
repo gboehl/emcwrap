@@ -136,6 +136,20 @@ def _hpd_df(x, alpha):
     return pd.DataFrame(hpd_vals, columns=cnames)
 
 
+def gelman_rubin(sample):
+    """The Gelman-Rubin (1992) statistics.
+    """
+
+    ndraws, nchains, npars = sample.shape
+
+    chain_mean = sample.mean(axis=0)
+    between_chain_var = ndraws*np.var(chain_mean, axis=0, ddof=1)
+    within_chain_var = np.var(sample, axis=0, ddof=1)
+    mean_variance = 1/nchains*np.sum(within_chain_var, axis=0)
+
+    return 1 - 1/ndraws + 1/ndraws*between_chain_var/mean_variance
+
+
 def summary(priors, store, pmode=None, bounds=None, alpha=0.1, top=None, show_prior=True):
     # inspired by pymc3 because it looks really nice
 
