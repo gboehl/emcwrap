@@ -6,7 +6,7 @@ from emcee.moves.de import DEMove
 import scipy.stats as ss
 
 
-class ADEMove(RedBlueMove):
+class ODEMove(RedBlueMove):
     r"""A proposal using adaptive differential evolution.
 
     This is the `Adaptive Differential evolution proposal` as suggested by 
@@ -36,7 +36,7 @@ class ADEMove(RedBlueMove):
         self.sma = None
 
         kwargs["nsplits"] = 1
-        super(ADEMove, self).__init__(**kwargs)
+        super(ODEMove, self).__init__(**kwargs)
 
     def setup(self, coords):
 
@@ -59,7 +59,7 @@ class ADEMove(RedBlueMove):
 
     def propose(self, model, state):
         # wrap original propose
-        state, accepted = super(ADEMove, self).propose(model, state)
+        state, accepted = super(ODEMove, self).propose(model, state)
         self.naccepted = sum(accepted)
         self.state = state
         return state, accepted
@@ -100,7 +100,7 @@ class ADEMove(RedBlueMove):
             x[sortinds[ndraws:][outbool]] = xchange[ndraws:]
 
         if self.verbose and ndraws:
-            print(f"[ADEMove:] resampling {ndraws+sum(outbool)} draw(s) ({sum(outbool)} with high leverage); MA-AF: {self.sma/ndim:0.2%}.")
+            print(f"[ODEMove:] resampling {ndraws+sum(outbool)} draw(s) ({sum(outbool)} with high leverage); MA-AF: {self.sma/ndim:0.2%}.")
 
         i0 = np.arange(ndim) + random.randint(ndim-1, size=ndim)
         i1 = np.arange(ndim) + random.randint(ndim-2, size=ndim)
@@ -111,7 +111,7 @@ class ADEMove(RedBlueMove):
         return q, np.zeros(ndim, dtype=np.float64)
 
 
-class XDEMove(RedBlueMove):
+class ADEMove(RedBlueMove):
     r"""A proposal using adaptive differential evolution.
 
     This is the `Adaptive Differential evolution proposal` as suggested by 
@@ -126,11 +126,11 @@ class XDEMove(RedBlueMove):
         verbose: (Optional[bool]): print message whenever chains are exchanged.
     """
 
-    def __init__(self, sigma=1.0e-5, gamma=None, aimc_prob=.05, nsamples_proposal_dist=None, df_proposal_dist=10, **kwargs):
+    def __init__(self, sigma=1.0e-5, gamma=None, aimh_prob=.05, nsamples_proposal_dist=None, df_proposal_dist=10, **kwargs):
 
         self.sigma = sigma
         self.gamma = gamma
-        self.aimc_prob = aimc_prob
+        self.aimh_prob = aimh_prob
         self.npdist = nsamples_proposal_dist
         self.dft = df_proposal_dist
 
@@ -138,7 +138,7 @@ class XDEMove(RedBlueMove):
         self.cov = None
 
         kwargs["nsplits"] = 1
-        super(XDEMove, self).__init__(**kwargs)
+        super(ADEMove, self).__init__(**kwargs)
 
     def setup(self, coords):
 
@@ -160,7 +160,7 @@ class XDEMove(RedBlueMove):
 
     def propose(self, model, state):
         # wrap original propose to grasp some information
-        state, accepted = super(XDEMove, self).propose(model, state)
+        state, accepted = super(ADEMove, self).propose(model, state)
         self.accepted = accepted
         return state, accepted
 
@@ -194,7 +194,7 @@ class XDEMove(RedBlueMove):
         # also skip in zeroth' iteration
         if self.cov is not None:
             # draw chains for AIMH sampling
-            xchnge = random.rand(nchain) <= self.aimc_prob
+            xchnge = random.rand(nchain) <= self.aimh_prob
 
             # draw alternative candidates and calculate their proposal density
             dist = ss.multivariate_t(self.mean, self.cov*(self.dft-2)/self.dft, df=self.dft)
