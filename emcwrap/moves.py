@@ -3,6 +3,7 @@
 import numpy as np
 from emcee.moves.red_blue import RedBlueMove
 from emcee.moves.de import DEMove
+import scipy.stats as ss
 
 
 class ADEMove(RedBlueMove):
@@ -108,4 +109,102 @@ class ADEMove(RedBlueMove):
         q = x + self.g0*(x[i0 % ndim] - x[i1 % ndim]) + f[:,np.newaxis]
 
         return q, np.zeros(ndim, dtype=np.float64)
+
+
+class XDEMove(RedBlueMove):
+    r"""A proposal using adaptive differential evolution.
+
+    This is the `Adaptive Differential evolution proposal` as suggested by 
+    <https://gregorboehl.com/live/ademc_boehl.pdf>`_.
+    Args:
+        sigma (float): The standard deviation of the Gaussian used to stretch
+            the proposal vector.
+        gamma (Optional[float]): The mean stretch factor for the proposal
+            vector. By default, it is :math:`2.38 / \sqrt{2\,\mathrm{ndim}}`
+            as recommended by the two references.
+        threshold: (Optional[float]): the threshold maximum proability below which an alternative chain will be proposed.
+        verbose: (Optional[bool]): print message whenever chains are exchanged.
+    """
+
+    def __init__(self, sigma=1.0e-5, gamma=None, aimc_prob=.05, nsamples_proposal_dist=None, df_proposal_dist=10, **kwargs):
+
+        self.sigma = sigma
+        self.gamma = gamma
+        self.aimc_prob = aimc_prob
+        self.npdist = nsamples_proposal_dist
+        self.dft = df_proposal_dist
+
+        self.accepted = None
+        self.cov = None
+
+        kwargs["nsplits"] = 1
+        super(XDEMove, self).__init__(**kwargs)
+
+    def setup(self, coords):
+
+        nchain, npar = coords.shape
+        self.g0 = self.gamma
+
+        if self.g0 is None:
+            # pure MAGIC
+            self.g0 = 2.38 / np.sqrt(2 * npar)
+
+        if self.npdist is None:
+            # more MAGIC
+            self.npdist = int(0.5*npar*(npar + 3))
+
+        if self.cov is None:
+            # even more MAGIC
+            self.cov = np.cov(coords.T, ddof=1)
+            self.mean = np.mean(coords, axis=0)
+
+    def propose(self, model, state):
+        # wrap original propose to grasp some information
+        state, accepted = super(XDEMove, self).propose(model, state)
+        self.accepted = accepted
+        return state, accepted
+
+    def get_proposal(self, x, dummy, random):
+
+        # calculate distribution stats
+        nchain, npar = x.shape
+
+        # differential evolution: draw the indices of the complementary chains
+        i0 = np.arange(nchain) + random.randint(nchain-1, size=nchain)
+        i1 = np.arange(nchain) + random.randint(nchain-2, size=nchain)
+        i1[i1 >= i0] += 1
+        # add small noise and calculate proposal
+        f = self.sigma * random.randn(nchain)
+        q = x + self.g0*(x[i0 % nchain] - x[i1 % nchain]) + f[:,np.newaxis]
+        factors = np.zeros(nchain, dtype=np.float64)
+
+        # skip in zeroth' iteration or if chain did not update
+        if self.accepted is not None and sum(self.accepted) > 1:
+
+            xaccepted = x[self.accepted]
+            naccepted = sum(self.accepted)
+
+            # only use newly accepted to update Gaussian
+            ncov = np.cov(xaccepted.T, ddof=1)
+            nmean = np.mean(xaccepted, axis=0)
+
+            self.cov = (1 - naccepted/self.npdist)*self.cov + naccepted/self.npdist*ncov
+            self.mean = (1 - naccepted/self.npdist)*self.mean + naccepted/self.npdist*nmean
+
+        # also skip in zeroth' iteration
+        if self.cov is not None:
+            # draw chains for AIMH sampling
+            xchnge = random.rand(nchain) <= self.aimc_prob
+
+            # draw alternative candidates and calculate their proposal density
+            dist = ss.multivariate_t(self.mean, self.cov*(self.dft-2)/self.dft, df=self.dft)
+            xcand = dist.rvs(sum(xchnge), random_state=random)
+            lprop_old = dist.logpdf(x[xchnge])
+            lprop_new = dist.logpdf(xcand)
+
+            # update proposals and factors
+            q[xchnge] = xcand
+            factors[xchnge] = lprop_old - lprop_new
+
+        return q, factors
 
