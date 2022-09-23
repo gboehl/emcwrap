@@ -188,7 +188,7 @@ class ADEMove(RedBlueMove):
             ncov = np.cov(xaccepted.T, ddof=1)
             nmean = np.mean(xaccepted, axis=0)
 
-            self.cov = (1 - naccepted/self.npdist)*self.cov + naccepted/self.npdist*ncov
+            self.cov = (self.npdist - naccepted)/(self.npdist-1)*self.cov + (naccepted-1)/(self.npdist-1)*ncov
             self.mean = (1 - naccepted/self.npdist)*self.mean + naccepted/self.npdist*nmean
 
         # also skip in zeroth' iteration
