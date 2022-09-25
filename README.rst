@@ -7,11 +7,10 @@ This provides a nice set of statistical tools for Bayesian analisis, but at its 
 
 The sampler has a series of advantages over conventional samplers:
 
-#. At core, ADEMC is a (very fast) **global multi-start optimizer** that converges to the posterior distribution. This makes any posterior mode density maximization prior to MCMC sampling superfluous.
+#. At core, ADEMC is a (very fast) **global multi-start optimizer** that converges to the posterior distribution. This makes any posterior mode density maximization prior to MCMC superfluous.
 #. ADEMC is pretty robust against odd shaped, **bimodal distributions**.
 #. ADEMC is **parallelizable**: many chains can run in parallel, and the necessary number of draws decreases almost one-to-one with the number of chains.
-#. ADEMC proposals are generated from an **endogenous and adaptive proposal distribution**, thereby reducing the number of necessary and crucial meta-parameters and providing close-to-optimal proposal distributions.
-
+#. ADEMC proposals are generated from an **endogenous and adaptive proposal distribution**, thereby reducing the number of necessary meta-parameters and providing close-to-optimal proposal distributions.
 
 Installation
 ------------
@@ -45,7 +44,7 @@ The proposal can be used directly as a drop-in replacement for `emcee <https://g
     ...
     # off you go sampling
  
-The parameters for ``ADEMove`` are documented `here <https://emcwrap.readthedocs.io/en/latest/modules.html#module-emcwrap.moves>`_.
+The rest of the usage is hence analoge to Emcee, see e.g. `this tutorial <https://emcee.readthedocs.io/en/stable/tutorials/quickstart/>`_. The parameters specific to the ``ADEMove`` are documented `here <https://emcwrap.readthedocs.io/en/latest/modules.html#module-emcwrap.moves>`_.
 
 The provided tools for Bayesian analysis are ready-to-use, but largely undocumented. Find the module documentation here: https://emcwrap.readthedocs.io/en/latest/modules.html
 
