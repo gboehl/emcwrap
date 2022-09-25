@@ -9,7 +9,7 @@ import scipy.stats as ss
 class ADEMove(RedBlueMove):
     r"""A proposal using adaptive differential evolution.
 
-    This is the `Adaptive Differential evolution proposal` as prosed in `Ensemble MCMC Sampling for DSGE Models <https://gregorboehl.com/live/ademc_boehl.pdf>`_.
+    This is the `Adaptive Differential Evolution proposal` as developed in `Ensemble MCMC Sampling for DSGE Models <https://gregorboehl.com/live/ademc_boehl.pdf>`_.
 
     Parameters
     ----------
@@ -20,7 +20,7 @@ class ADEMove(RedBlueMove):
     aimh_prob : float, optional
         probability to draw a AIMH proposal. By default this is set to :math:`0.05`.
     nsamples_proposal_dist : int
-        window size used to calculate the rolling-window covariance estimate. By default this is the number of unique elements in the proposal mean and covariance :math:`0.5 d(d+3)`.
+        window size used to calculate the rolling-window covariance estimate. By default this is the number of unique elements in the proposal mean and covariance :math:`0.5 \mathrm{ndim}(\mathrm{ndim}+3)`.
     df_proposal_dist : float
         degrees of freedom of the multivariate t distribution used for AIMH proposals. Defaults to :math:`10`.
     """
@@ -45,7 +45,7 @@ class ADEMove(RedBlueMove):
         super(ADEMove, self).__init__(**kwargs)
 
     def setup(self, coords):
-        """Set some sane defaults"""
+        # set some sane defaults
 
         nchain, npar = coords.shape
         self.g0 = self.gamma
@@ -65,12 +65,13 @@ class ADEMove(RedBlueMove):
             self.mean = np.mean(coords, axis=0)
 
     def propose(self, model, state):
-        # wrap original propose to grasp the array of accepted proposals
+        # wrap original propose to get the boolean array of accepted proposals
         state, accepted = super(ADEMove, self).propose(model, state)
         self.accepted = accepted
         return state, accepted
 
     def get_proposal(self, x, dummy, random):
+        # actual proposal function
 
         # calculate distribution stats
         nchain, npar = x.shape
