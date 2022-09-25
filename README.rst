@@ -5,6 +5,14 @@ emcwrap
 
 This provides a nice set of statistical tools for Bayesian analisis, but at its core lies the ADEMC proposal developed in `Ensemble MCMC Sampling for DSGE Models <https://gregorboehl.com/live/ademc_boehl.pdf>`_. *(Gregor Boehl, 2022, CRC 224 discussion paper series)*.
 
+The sampler has a series of advantages over conventional samplers:
+
+#. At core, ADEMC is a (very fast) **global multi-start optimizer** that converges to the posterior distribution. This makes any posterior mode density maximization prior to MCMC sampling superfluous.
+#. ADEMC is pretty robust against odd shaped, **bimodal distributions**.
+#. ADEMC is **parallelizable**: many chains can run in parallel, and the necessary number of draws decreases almost one-to-one with the number of chains.
+#. ADEMC proposals are generated from an **endogenous and adaptive proposal distribution**, thereby reducing the number of necessary and crucial meta-parameters and providing close-to-optimal proposal distributions.
+
+
 Installation
 ------------
 
