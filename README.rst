@@ -37,6 +37,7 @@ The proposal can be used directly as a drop-in replacement for `emcee <https://g
     ...
     # off you go sampling
  
+The parameters for ``ADEMove`` are documented `here <https://emcwrap.readthedocs.io/en/latest/modules.html#module-emcwrap.moves>`_.
 
 The provided tools for Bayesian analysis are ready-to-use, but largely undocumented. Find the module documentation here: https://emcwrap.readthedocs.io/en/latest/modules.html
 
