@@ -45,7 +45,7 @@ class ADEMove(RedBlueMove):
         super(ADEMove, self).__init__(**kwargs)
 
     def setup(self, coords):
-        """Set some sane default"""
+        """Set some sane defaults"""
 
         nchain, npar = coords.shape
         self.g0 = self.gamma
