@@ -13,11 +13,16 @@ class ADEMove(RedBlueMove):
 
     Parameters
     ----------
-    sigma (Optional[float]): the standard deviation of the Gaussian used to stretch the proposal vector.
-    gamma (Optional[float]): the mean stretch factor for the proposal vector. By default, it is :math:`2.38 / \sqrt{2\,\mathrm{ndim}}` as recommended by `ter Braak (2006) <http://www.stat.columbia.edu/~gelman/stuff_for_blog/cajo.pdf>`_.
-    aimh_prob: (Optional[float]): the probability to draw a AIMH proposal. By default this is set to :math:`0.05`.
-    nsamples_proposal_dist: (Optional[int]): the window size used to calculate the rolling-window covariance estimate. By default this is the number of unique elements in the proposal mean and covariance :math:`0.5 d(d+3)`.
-    df_proposal_dist: (Optional[float]): the degrees of freedom of the multivariate t distribution used for AIMH proposals. Defaults to :math:`10`.
+    sigma : float, optional
+        standard deviation of the Gaussian used to stretch the proposal vector.
+    gamma : float, optional
+        mean stretch factor for the proposal vector. By default, it is :math:`2.38 / \sqrt{2\,\mathrm{ndim}}` as recommended by `ter Braak (2006) <http://www.stat.columbia.edu/~gelman/stuff_for_blog/cajo.pdf>`_.
+    aimh_prob : float, optional
+        probability to draw a AIMH proposal. By default this is set to :math:`0.05`.
+    nsamples_proposal_dist : int
+        window size used to calculate the rolling-window covariance estimate. By default this is the number of unique elements in the proposal mean and covariance :math:`0.5 d(d+3)`.
+    df_proposal_dist : float
+        degrees of freedom of the multivariate t distribution used for AIMH proposals. Defaults to :math:`10`.
     """
 
     def __init__(
