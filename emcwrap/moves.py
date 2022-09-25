@@ -10,12 +10,14 @@ class ADEMove(RedBlueMove):
     r"""A proposal using adaptive differential evolution.
 
     This is the `Adaptive Differential evolution proposal` as prosed in `Ensemble MCMC Sampling for DSGE Models <https://gregorboehl.com/live/ademc_boehl.pdf>`_.
-    Args:
-        sigma (Optional[float]): The standard deviation of the Gaussian used to stretch the proposal vector.
-        gamma (Optional[float]): The mean stretch factor for the proposal vector. By default, it is :math:`2.38 / \sqrt{2\,\mathrm{ndim}}` as recommended by `ter Braak (2006) <http://www.stat.columbia.edu/~gelman/stuff_for_blog/cajo.pdf>`_.
-        aimh_prob: (Optional[float]): the probability to draw a AIMH proposal. By default this is set to :math:`0.05`.
-        nsamples_proposal_dist: (Optional[int]): the window size used to calculate the rolling-window covariance estimate. By default this is the number of unique elements in the proposal mean and covariance :math:`0.5 d(d+3)`.
-        df_proposal_dist: (Optional[float]): the degrees of freedom of the multivariate t distribution used for AIMH proposals. Defaults to :math:`10`.
+
+    Parameters
+    ----------
+    sigma (Optional[float]): the standard deviation of the Gaussian used to stretch the proposal vector.
+    gamma (Optional[float]): the mean stretch factor for the proposal vector. By default, it is :math:`2.38 / \sqrt{2\,\mathrm{ndim}}` as recommended by `ter Braak (2006) <http://www.stat.columbia.edu/~gelman/stuff_for_blog/cajo.pdf>`_.
+    aimh_prob: (Optional[float]): the probability to draw a AIMH proposal. By default this is set to :math:`0.05`.
+    nsamples_proposal_dist: (Optional[int]): the window size used to calculate the rolling-window covariance estimate. By default this is the number of unique elements in the proposal mean and covariance :math:`0.5 d(d+3)`.
+    df_proposal_dist: (Optional[float]): the degrees of freedom of the multivariate t distribution used for AIMH proposals. Defaults to :math:`10`.
     """
 
     def __init__(
@@ -69,8 +71,8 @@ class ADEMove(RedBlueMove):
         nchain, npar = x.shape
 
         # differential evolution: draw the indices of the complementary chains
-        i0 = np.arange(nchain) + random.randint(nchain - 1, size=nchain)
-        i1 = np.arange(nchain) + random.randint(nchain - 2, size=nchain)
+        i0 = np.arange(nchain) + random.randint(1, nchain, size=nchain)
+        i1 = np.arange(nchain) + random.randint(1, nchain - 1, size=nchain)
         i1[i1 >= i0] += 1
         # add small noise and calculate proposal
         f = self.sigma * random.randn(nchain)
@@ -83,7 +85,7 @@ class ADEMove(RedBlueMove):
             xaccepted = x[self.accepted]
             naccepted = sum(self.accepted)
 
-            # only use newly accepted to update Gaussian
+            # only use newly accepted to update AIMH proposal distribution
             ncov = np.cov(xaccepted.T, ddof=1)
             nmean = np.mean(xaccepted, axis=0)
 
