@@ -7,9 +7,9 @@ import scipy.stats as ss
 
 
 class DIMEMove(RedBlueMove):
-    r"""A proposal using adaptive differential-independence mixture evolution.
+    r"""A proposal using adaptive differential-independence mixture enseble MCMC.
 
-    This is the `Differential-Independence Mixture Evolution proposal` as developed in `Ensemble MCMC Sampling for DSGE Models <https://gregorboehl.com/live/ademc_boehl.pdf>`_ (previousy ADEMC).
+    This is the `Differential-Independence Mixture Ensemble proposal` as developed in `Ensemble MCMC Sampling for DSGE Models <https://gregorboehl.com/live/ademc_boehl.pdf>`_ (previousy ADEMC).
 
     Parameters
     ----------
