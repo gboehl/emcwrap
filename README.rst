@@ -1,16 +1,16 @@
 emcwrap
 =======
 
-**Collection of tools for Bayesian inference using Adaptive Differential Evolution MCMC** 
+**Collection of tools for Bayesian inference using Differential-Independence Mixture Evolution MCMC**
 
-This provides a nice set of statistical tools for Bayesian analisis, but at its core lies the ADEMC proposal developed in `Ensemble MCMC Sampling for DSGE Models <https://gregorboehl.com/live/ademc_boehl.pdf>`_. *(Gregor Boehl, 2022, CRC 224 discussion paper series)*.
+This provides a nice set of statistical tools for Bayesian analisis, but at its core lies the DIME proposal (previously ADEMC) developed in `Ensemble MCMC Sampling for DSGE Models <https://gregorboehl.com/live/ademc_boehl.pdf>`_. *(Gregor Boehl, 2022, CRC 224 discussion paper series)*.
 
 The sampler has a series of advantages over conventional samplers:
 
-#. At core, ADEMC is a (very fast) **global multi-start optimizer** that converges to the posterior distribution. This makes any posterior mode density maximization prior to MCMC superfluous.
-#. ADEMC is pretty robust against odd shaped, **bimodal distributions**.
-#. ADEMC is **parallelizable**: many chains can run in parallel, and the necessary number of draws decreases almost one-to-one with the number of chains.
-#. ADEMC proposals are generated from an **endogenous and adaptive proposal distribution**, thereby reducing the number of necessary meta-parameters and providing close-to-optimal proposal distributions.
+#. At core, DIME MCMC is a (very fast) **global multi-start optimizer** that converges to the posterior distribution. This makes any posterior mode density maximization prior to MCMC sampling superfluous.
+#. The DIME sampler is pretty robust for odd shaped, **bimodal distributions**.
+#. DIME MCMC is **parallelizable**: many chains can run in parallel, and the necessary number of draws decreases almost one-to-one with the number of chains.
+#. DIME proposals are generated from an **endogenous and adaptive proposal distribution**, thereby reducing the number of necessary meta-parameters and providing close-to-optimal proposal distributions.
 
 Installation
 ------------
@@ -32,9 +32,9 @@ The proposal can be used directly as a drop-in replacement for `emcee <https://g
 .. code-block:: python
 
     import emcee
-    from emcwrap import ADEMove
+    from emcwrap import DIMEMove
     
-    move = ADEMove(aimh_prob=.1, df_proposal_dist=10)
+    move = DIMEMove(aimh_prob=.1, df_proposal_dist=10)
     
     ...
     # define your density function, number of chains etc...
