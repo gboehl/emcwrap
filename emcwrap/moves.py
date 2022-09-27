@@ -6,10 +6,10 @@ import numpy as np
 import scipy.stats as ss
 
 
-class ADEMove(RedBlueMove):
-    r"""A proposal using adaptive differential evolution.
+class DIMEMove(RedBlueMove):
+    r"""A proposal using adaptive differential-independence mixture evolution.
 
-    This is the `Adaptive Differential Evolution proposal` as developed in `Ensemble MCMC Sampling for DSGE Models <https://gregorboehl.com/live/ademc_boehl.pdf>`_.
+    This is the `Differential-Independence Mixture Evolution proposal` as developed in `Ensemble MCMC Sampling for DSGE Models <https://gregorboehl.com/live/ademc_boehl.pdf>`_ (previousy ADEMC).
 
     Parameters
     ----------
@@ -18,7 +18,7 @@ class ADEMove(RedBlueMove):
     gamma : float, optional
         mean stretch factor for the proposal vector. By default, it is :math:`2.38 / \sqrt{2\,\mathrm{ndim}}` as recommended by `ter Braak (2006) <http://www.stat.columbia.edu/~gelman/stuff_for_blog/cajo.pdf>`_.
     aimh_prob : float, optional
-        probability to draw a AIMH proposal. By default this is set to :math:`0.05`.
+        probability to draw an adaptive independence Metropolis Hastings (AIMH) proposal. By default this is set to :math:`0.05`.
     nsamples_proposal_dist : int
         window size used to calculate the rolling-window covariance estimate. By default this is the number of unique elements in the proposal mean and covariance :math:`0.5 \mathrm{ndim}(\mathrm{ndim}+3)`.
     df_proposal_dist : float
@@ -42,7 +42,7 @@ class ADEMove(RedBlueMove):
         self.dft = df_proposal_dist
 
         kwargs["nsplits"] = 1
-        super(ADEMove, self).__init__(**kwargs)
+        super(DIMEMove, self).__init__(**kwargs)
 
     def setup(self, coords):
         # set some sane defaults
@@ -66,7 +66,7 @@ class ADEMove(RedBlueMove):
 
     def propose(self, model, state):
         # wrap original propose to get the boolean array of accepted proposals
-        state, accepted = super(ADEMove, self).propose(model, state)
+        state, accepted = super(DIMEMove, self).propose(model, state)
         self.accepted = accepted
         return state, accepted
 
@@ -119,3 +119,6 @@ class ADEMove(RedBlueMove):
             factors[xchnge] = lprop_old - lprop_new
 
         return q, factors
+
+
+ADEMove = DIMEMove  # set alias for compatibility
