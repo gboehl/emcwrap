@@ -21,7 +21,7 @@ Installing the `repository version <https://pypi.org/project/econpizza/>`_ from 
 
    pip install emcwrap
   
-There exists a complementary stand-alone implementation in Julia language `here <https://github.com/gboehl/ADEMC.jl>`_.
+There exists a complementary stand-alone implementation in `Julia language <https://github.com/gboehl/ADEMC.jl>`_.
 
    
 Usage
@@ -50,6 +50,8 @@ The provided tools for Bayesian analysis are ready-to-use, but largely undocumen
 
 References
 ----------
+
+If you are using this software in your research, please cite
 
 .. code-block::
 
