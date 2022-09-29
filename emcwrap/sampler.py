@@ -10,7 +10,7 @@ from grgrlib import map2arr
 from .stats import summary
 
 
-def run_mcmc(lprob, nsteps, p0=None, moves=None, priors=None, prior_transform=None, backend=None, update_freq=None, resume=False, pool=None, report=None, description=None, temp=1, maintenance_interval=False, seed=None, verbose=False, **kwargs):
+def run_mcmc(lprob, nsteps, p0=None, moves=None, priors=None, prior_transform=None, backend=None, update_freq=False, resume=False, pool=None, report=None, description=None, temp=1, maintenance_interval=False, seed=None, verbose=False, **kwargs):
     """Run the emcee sampler.
     """
 
@@ -30,9 +30,6 @@ def run_mcmc(lprob, nsteps, p0=None, moves=None, priors=None, prior_transform=No
         p0 = backend.get_chain()[-1]
 
     nwalks, ndim = np.shape(p0)
-
-    if update_freq is None:
-        update_freq = nsteps // 5
 
     sampler = emcee.EnsembleSampler(
         nwalks, ndim, lprob, moves=moves, pool=pool, backend=backend)
@@ -56,11 +53,11 @@ def run_mcmc(lprob, nsteps, p0=None, moves=None, priors=None, prior_transform=No
             lls = list(result)[1]
             maf = 1-sum(lls == old_lls)/nwalks
             try:
-                maf = f"{maf:2.0%}"
+                maf = f"{maf:3.0%}"
             except BlockingIOError:
                 maf = "??"
             pbar.set_description(
-                f"[ll/MAF:{np.max(lls):0.3f}({np.std(lls):1.0e})/{maf}]"
+                f"[ll/MAF:{np.max(lls):7.3f}({np.std(lls):1.0e})/{maf}]"
             )
             old_lls = lls.copy()
 
