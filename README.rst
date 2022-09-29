@@ -1,9 +1,9 @@
 emcwrap
 =======
 
-**Collection of tools for Bayesian inference using Differential-Independence Mixture Evolution MCMC**
+**Collection of tools for Bayesian inference using DIME MCMC**
 
-This provides a nice set of statistical tools for Bayesian analisis, but at its core lies the DIME proposal (previously ADEMC) developed in `Ensemble MCMC Sampling for DSGE Models <https://gregorboehl.com/live/ademc_boehl.pdf>`_. *(Gregor Boehl, 2022, CRC 224 discussion paper series)*.
+This provides the Differential-Independence Mixture Ensemble (DIME) proposal together with a nice set of statistical tools for Bayesian analysis. DIME MCMC (previously ADEMC) is developed in `Ensemble MCMC Sampling for DSGE Models <https://gregorboehl.com/live/ademc_boehl.pdf>`_. *(Gregor Boehl, 2022, CRC 224 discussion paper series)*.
 
 The sampler has a series of advantages over conventional samplers:
 
@@ -21,7 +21,7 @@ Installing the `repository version <https://pypi.org/project/econpizza/>`_ from 
 
    pip install emcwrap
   
-There exists a complementary stand-alone implementation in Julia language `here <https://github.com/gboehl/ADEMC.jl>`_.
+There exists a complementary stand-alone implementation in `Julia language <https://github.com/gboehl/ADEMC.jl>`_.
 
    
 Usage
@@ -50,6 +50,8 @@ The provided tools for Bayesian analysis are ready-to-use, but largely undocumen
 
 References
 ----------
+
+If you are using this software in your research, please cite
 
 .. code-block::
 
