@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import warnings
+import emcee
 import numpy as np
 import pandas as pd
 import scipy.stats as ss
@@ -224,3 +225,7 @@ def summary(priors, store, pmode=None, bounds=None, alpha=0.1, top=None, show_pr
     dforg = pd.concat(var_dfs, axis=0, sort=False)
 
     return dforg
+
+
+# a wrapper without warning
+def integrated_time(x): return emcee.autocorr.integrated_time(x, tol=0)
