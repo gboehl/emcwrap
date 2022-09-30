@@ -20,7 +20,7 @@ class DIMEMove(RedBlueMove):
     aimh_prob : float, optional
         probability to draw an adaptive independence Metropolis Hastings (AIMH) proposal. By default this is set to :math:`0.05`.
     neff_prop_dist : int
-        window size used to calculate the rolling-window covariance estimate. By default this is the number of unique elements in the proposal mean and covariance :math:`0.5 \mathrm{ndim}(\mathrm{ndim}+3)`.
+        window size used to calculate the rolling-window covariance estimate. By default this is the number of unique elements in the proposal mean and covariance devided by ACF times mean acceptance ratio :math:`4 \mathrm{ndim}(\mathrm{ndim}+3)`.
     df_proposal_dist : float
         degrees of freedom of the multivariate t distribution used for AIMH proposals. Defaults to :math:`10`.
     """
