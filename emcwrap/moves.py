@@ -55,7 +55,7 @@ class DIMEMove(RedBlueMove):
             self.cov = np.eye(npar)
             self.mean = np.zeros(npar)
             self.accepted = np.ones(nchain, dtype=bool)
-            self.lweight = -np.inf
+            self.cumlweight = -np.inf
 
     def propose(self, model, state):
         # wrap original propose to get the boolean array of accepted proposals
@@ -80,7 +80,7 @@ class DIMEMove(RedBlueMove):
         factors = np.zeros(nchain, dtype=np.float64)
 
         # log weight of current ensemble
-        newlweight = logsumexp(self.lprobs) + \
+        lweight = logsumexp(self.lprobs) + \
             np.log(sum(self.accepted)) - np.log(nchain)
 
         # calculate stats for current ensemble
@@ -88,13 +88,12 @@ class DIMEMove(RedBlueMove):
         nmean = np.mean(x, axis=0)
 
         # update AIMH proposal distribution
-        # "new" cummulative weight
-        lweight = np.logaddexp(self.lweight, newlweight)
-        self.cov = np.exp(self.lweight - lweight) * \
-            self.cov + np.exp(newlweight - lweight) * ncov
-        self.mean = np.exp(self.lweight - lweight) * \
-            self.mean + np.exp(newlweight - lweight) * nmean
-        self.lweight = lweight
+        newcumlweight = np.logaddexp(self.cumlweight, lweight)
+        self.cov = np.exp(self.cumlweight - newcumlweight) * \
+            self.cov + np.exp(lweight - newcumlweight) * ncov
+        self.mean = np.exp(self.cumlweight - newcumlweight) * \
+            self.mean + np.exp(lweight - newcumlweight) * nmean
+        self.cumlweight = newcumlweight
 
         # draw chains for AIMH sampling
         xchnge = random.rand(nchain) <= self.aimh_prob
