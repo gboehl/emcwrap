@@ -8,7 +8,7 @@ import scipy.stats as ss
 
 
 class DIMEMove(RedBlueMove):
-    r"""A proposal using adaptive differential-independence mixture enseble MCMC.
+    r"""A proposal using adaptive differential-independence mixture ensemble MCMC.
 
     This is the `Differential-Independence Mixture Ensemble proposal` as developed in `Ensemble MCMC Sampling for DSGE Models <https://gregorboehl.com/live/ademc_boehl.pdf>`_ (previousy ADEMC).
 
@@ -52,8 +52,10 @@ class DIMEMove(RedBlueMove):
 
         if not hasattr(self, "cov"):
             # even more MAGIC
-            self.cov = np.cov(coords.T, ddof=1)
-            self.mean = np.mean(coords, axis=0)
+            self.cov = np.eye(npar)
+            self.mean = np.zeros(npar)
+            self.accepted = np.ones(nchain, dtype=bool)
+            self.lweight = -np.inf
 
     def propose(self, model, state):
         # wrap original propose to get the boolean array of accepted proposals
@@ -77,41 +79,34 @@ class DIMEMove(RedBlueMove):
         q = x + self.g0 * (x[i0 % nchain] - x[i1 % nchain]) + f[:, np.newaxis]
         factors = np.zeros(nchain, dtype=np.float64)
 
-        if not hasattr(self, "lweight"):
-            self.lweight = logsumexp(self.lprops)  # log cummulative weight
+        # log weight of current ensemble
+        newlweight = logsumexp(self.lprops) + np.log(sum(self.accepted)) - np.log(nchain)
 
-        # skip if chain did not update
-        if hasattr(self, "accepted") and sum(self.accepted) > 1:
+        # calculate stats for current ensemble
+        ncov = np.cov(x.T, ddof=1)
+        nmean = np.mean(x, axis=0)
 
-            xaccepted = x[self.accepted]
-            weightaccepted = logsumexp(self.lprops[self.accepted])
-            naccepted = sum(self.accepted)
+        # update AIMH proposal distribution
+        lweight = np.logaddexp(self.lweight, newlweight) # "new" cummulative weight
+        self.cov = np.exp(self.lweight - lweight) * \
+            self.cov + np.exp(newlweight - lweight) * ncov
+        self.mean = np.exp(self.lweight - lweight) * \
+            self.mean + np.exp(newlweight - lweight) * nmean
+        self.lweight = lweight
 
-            # only use newly accepted to update AIMH proposal distribution
-            ncov = np.cov(xaccepted.T, ddof=1)
-            nmean = np.mean(xaccepted, axis=0)
+        # draw chains for AIMH sampling
+        xchnge = random.rand(nchain) <= self.aimh_prob
 
-            newlweight = np.logaddexp(self.lweight, weightaccepted)
-            self.cov = np.exp(self.lweight - newlweight) * \
-                self.cov + np.exp(weightaccepted - newlweight) * ncov
-            self.mean = np.exp(self.lweight - newlweight) * \
-                self.mean + np.exp(weightaccepted - newlweight) * nmean
-            self.lweight = newlweight
+        # draw alternative candidates and calculate their proposal density
+        dist = ss.multivariate_t(
+            self.mean, self.cov * (self.dft - 2) / self.dft, df=self.dft, allow_singular=True)
+        xcand = dist.rvs(sum(xchnge), random_state=random)
+        lprop_old = dist.logpdf(x[xchnge])
+        lprop_new = dist.logpdf(xcand)
 
-        if hasattr(self, "cov"):
-            # draw chains for AIMH sampling
-            xchnge = random.rand(nchain) <= self.aimh_prob
-
-            # draw alternative candidates and calculate their proposal density
-            dist = ss.multivariate_t(
-                self.mean, self.cov * (self.dft - 2) / self.dft, df=self.dft, allow_singular=True)
-            xcand = dist.rvs(sum(xchnge), random_state=random)
-            lprop_old = dist.logpdf(x[xchnge])
-            lprop_new = dist.logpdf(xcand)
-
-            # update proposals and factors
-            q[xchnge] = xcand
-            factors[xchnge] = lprop_old - lprop_new
+        # update proposals and factors
+        q[xchnge] = xcand
+        factors[xchnge] = lprop_old - lprop_new
 
         return q, factors
 
