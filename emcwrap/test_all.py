@@ -6,6 +6,7 @@ import numpy as np
 from .moves import DIMEMove
 from .sampler import run_mcmc
 from scipy.stats import multivariate_normal, norm
+from scipy.special import logsumexp
 
 filepath = os.path.dirname(__file__)
 
@@ -13,22 +14,26 @@ def create_test_func(ndim, weight, distance, cov_scale):
 
     cov = np.eye(ndim)*cov_scale
     mean = np.zeros(ndim)
-    mean[0] = distance/2
+    mean[0] = distance
 
-    lw0 = np.log(weight)
-    lw1 = np.log(1-weight)
+    lw0 = np.log(weight[0])
+    lw1 = np.log(weight[1])
+    lw2 = np.log(1-weight[0]-weight[1])
 
     dist = multivariate_normal(np.zeros(ndim), cov)
 
     def log_prob(p):
-        return np.logaddexp(lw0 + dist.logpdf(p + mean), lw1 + dist.logpdf(p - mean))
+        return logsumexp((lw0 + dist.logpdf(p + mean), lw1 + dist.logpdf(p), lw2 + dist.logpdf(p - mean)))
 
     return log_prob
 
 
 def marginal_pdf_test_func(x, cov_scale, m, weight):
+
     normal = norm(scale=np.sqrt(cov_scale))
-    return (1-weight)*normal.pdf(x-m/2) + weight*normal.pdf(x+m/2)
+
+    return weight[0]*normal.pdf(x+m) + weight[1]*normal.pdf(x) + (1-weight[0]-weight[1])*normal.pdf(x-m)
+
 
 def test_all(create=False):
 
@@ -37,7 +42,7 @@ def test_all(create=False):
     # define distribution
     m = 2
     cov_scale = 0.05
-    weight = 0.33
+    weight = (0.33, 0.1)
     ndim = 35
 
     log_prob = create_test_func(ndim, weight, m, cov_scale)

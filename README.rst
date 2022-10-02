@@ -67,12 +67,13 @@ Lets look at an example. Let's define a nice and challenging distribution:
     # define distribution
     m = 2
     cov_scale = 0.05
-    weight = 0.33
+    weight = (0.33, .1)
     ndim = 35
+    initvar = np.sqrt(2)
 
     log_prob = create_test_func(ndim, weight, m, cov_scale)
 
-``log_prob`` will now return the log-PDF of a 35-dimensional bimodal Gaussian mixture. Next, define the initial ensemble. In a Bayesian setup, a good initial ensemble would be a sample from the prior distribution. Here, we will go for a sample from a rather flat Gaussian distribution.
+``log_prob`` will now return the log-PDF of a 35-dimensional Gaussian mixture with three separate modes. Next, define the initial ensemble. In a Bayesian setup, a good initial ensemble would be a sample from the prior distribution. Here, we will go for a sample from a rather flat Gaussian distribution.
 
 
 .. code-block:: python
@@ -116,20 +117,21 @@ Lets plot the marginal distribution along the first dimension (remember that thi
 
 .. code-block:: python
 
-    figs, axs = figurator(1, 1, 1)
+    figs, axs = figurator(1, 1, 1, figsize=(9,6))
     axs[0].hist(chain[-int(niter / 3) :, :, 0].flatten(), bins=50, density=True, alpha=0.2, label="Sample")
     xlim = axs[0].get_xlim()
     x = np.linspace(xlim[0], xlim[1], 100)
-    axs[0].plot(x, ss.norm(scale=2**0.25).pdf(x), "--", label="Initialization")
+    axs[0].plot(x, ss.norm(scale=np.sqrt(initvar)).pdf(x), "--", label="Initialization")
     axs[0].plot(x, ss.t(df=10, loc=moves.prop_mean[0], scale=moves.prop_cov[0, 0] ** 0.5).pdf(x), ":", label="Final proposals")
     axs[0].plot(x, marginal_pdf_test_func(x, cov_scale, m, weight), label="Target")
     axs[0].legend()
+
 
 .. image:: https://github.com/gboehl/emcwrap/blob/main/docs/dist.png?raw=true
   :width: 800
   :alt: Sample and target distribution
 
-To ensure propper mixing, let us also have a look at the MCMC traces, again focussing on the first dimension. Note how chains are also switching between the two modes because of the global proposal kernel.
+To ensure proper mixing, let us also have a look at the MCMC traces, again focussing on the first dimension. Note how chains are also switching between the two modes because of the global proposal kernel.
 
 .. code-block:: python
 
@@ -140,7 +142,7 @@ To ensure propper mixing, let us also have a look at the MCMC traces, again focu
   :width: 800
   :alt: MCMC traces
 
-While DIME is an MCMC sampler, it can straightforwardy be used as a global optimization routine. To this end, specify some broad starting region (in a non-Bayesian setup there is no prior) and let the sampler run for an extended number of iterations. Finally, assess whether the maximum value per ensemble did not change much in the last few hundered iterations. In a normal Bayesian setup, plotting the associated log-likelhood over time also helps to assess convergence to the posterior distribution.
+While DIME is an MCMC sampler, it can straightforwardly be used as a global optimization routine. To this end, specify some broad starting region (in a non-Bayesian setup there is no prior) and let the sampler run for an extended number of iterations. Finally, assess whether the maximum value per ensemble did not change much in the last few hundred iterations. In a normal Bayesian setup, plotting the associated log-likelihood over time also helps to assess convergence to the posterior distribution.
 
 .. code-block:: python
 
