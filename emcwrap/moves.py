@@ -4,7 +4,6 @@ from emcee.moves.red_blue import RedBlueMove
 from emcee.moves.de import DEMove
 from scipy.special import logsumexp
 import numpy as np
-from numpy.lib.scimath import log as slog
 import scipy.stats as ss
 
 
@@ -85,13 +84,15 @@ class DIMEMove(RedBlueMove):
             np.log(sum(self.accepted)) - np.log(nchain)
 
         # calculate stats for current ensemble
-        ncov = slog(np.cov(x.T, ddof=1))
-        nmean = slog(np.mean(x, axis=0))
+        ncov = np.cov(x.T, ddof=1)
+        nmean = np.mean(x, axis=0)
 
         # update AIMH proposal distribution
         newcumlweight = np.logaddexp(self.cumlweight, lweight)
-        self.prop_cov = np.exp(self.cumlweight - newcumlweight + slog(self.prop_cov)) + np.exp(lweight - newcumlweight + ncov)
-        self.prop_mean = np.exp(self.cumlweight - newcumlweight + slog(self.prop_mean)) + np.exp(lweight - newcumlweight + nmean)
+        self.prop_cov = np.exp(self.cumlweight - newcumlweight) * \
+            self.prop_cov + np.exp(lweight - newcumlweight) * ncov
+        self.prop_mean = np.exp(self.cumlweight - newcumlweight) * \
+            self.prop_mean + np.exp(lweight - newcumlweight) * nmean
         self.cumlweight = newcumlweight
 
         # draw chains for AIMH sampling

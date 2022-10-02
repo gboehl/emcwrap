@@ -62,5 +62,4 @@ def test_all(create=False):
     else:
         test_median = np.load(path)
         # gives slightly different estimates depending on architecture
-        # np.testing.assert_allclose(median, test_median, rtol=5e-4)
-        np.testing.assert_allclose(median, test_median)
+        np.testing.assert_allclose(median, test_median, rtol=5e-4)
