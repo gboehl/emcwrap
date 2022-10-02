@@ -8,9 +8,9 @@ This provides the Differential-Independence Mixture Ensemble (DIME) MCMC sampler
 The sampler has a series of advantages over conventional samplers:
 
 #. DIME MCMC is a (very fast) **global multi-start optimizer** and, at the same time, a **MCMC sampler** that converges to the posterior distribution. This makes any posterior mode density maximization prior to MCMC sampling superfluous.
-#. The DIME sampler is pretty robust for odd shaped, **bimodal distributions**.
+#. The DIME sampler is pretty robust for odd shaped, **multimodal distributions**.
 #. DIME MCMC is **parallelizable**: many chains can run in parallel, and the necessary number of draws decreases almost one-to-one with the number of chains.
-#. DIME proposals are generated from an **endogenous and adaptive proposal distribution**, thereby reducing the number of necessary meta-parameters and providing close-to-optimal proposal distributions.
+#. DIME proposals are generated from an **endogenous and adaptive proposal distribution**, thereby providing close-to-optimal proposal distributions without the need for manual fine-tuning.
 
 Installation
 ------------
@@ -73,8 +73,9 @@ Lets look at an example. Let's define a nice and challenging distribution:
 
     log_prob = create_test_func(ndim, weight, m, cov_scale)
 
-``log_prob`` will now return the log-PDF of a 35-dimensional Gaussian mixture with three separate modes. Next, define the initial ensemble. In a Bayesian setup, a good initial ensemble would be a sample from the prior distribution. Here, we will go for a sample from a rather flat Gaussian distribution.
+``log_prob`` will now return the log-PDF of a 35-dimensional Gaussian mixture with **three separate modes**. 
 
+Next, define the initial ensemble. In a Bayesian setup, a good initial ensemble would be a sample from the prior distribution. Here, we will go for a sample from a rather flat Gaussian distribution.
 
 .. code-block:: python
 
@@ -97,10 +98,6 @@ Now let the sampler run for 3000 iterations.
     moves = ew.DIMEMove(aimh_prob=0.1, df_proposal_dist=10)
     sampler = ew.run_mcmc(log_prob, niter, p0=initchain, moves=moves)
 
-    # get elements
-    chain = sampler.get_chain()
-    lprob = sampler.get_log_prob()
-
 .. code-block::
 
     [ll/MAF: 11.598(4e+00)/23%]: 100%|████████████████████ 3000/3000 [00:18<00:00, 164.70sample(s)/s]
@@ -117,6 +114,11 @@ Lets plot the marginal distribution along the first dimension (remember that thi
 
 .. code-block:: python
 
+    # get elements
+    chain = sampler.get_chain()
+    lprob = sampler.get_log_prob()
+
+    # plotting
     figs, axs = figurator(1, 1, 1, figsize=(9,6))
     axs[0].hist(chain[-int(niter / 3) :, :, 0].flatten(), bins=50, density=True, alpha=0.2, label="Sample")
     xlim = axs[0].get_xlim()
@@ -131,7 +133,7 @@ Lets plot the marginal distribution along the first dimension (remember that thi
   :width: 800
   :alt: Sample and target distribution
 
-To ensure proper mixing, let us also have a look at the MCMC traces, again focussing on the first dimension. Note how chains are also switching between the two modes because of the global proposal kernel.
+To ensure proper mixing, let us also have a look at the MCMC traces, again focussing on the first dimension. 
 
 .. code-block:: python
 
@@ -141,6 +143,8 @@ To ensure proper mixing, let us also have a look at the MCMC traces, again focus
 .. image:: https://github.com/gboehl/emcwrap/blob/main/docs/traces.png?raw=true
   :width: 800
   :alt: MCMC traces
+ 
+Note how chains are also switching between the two modes because of the global proposal kernel.
 
 While DIME is an MCMC sampler, it can straightforwardly be used as a global optimization routine. To this end, specify some broad starting region (in a non-Bayesian setup there is no prior) and let the sampler run for an extended number of iterations. Finally, assess whether the maximum value per ensemble did not change much in the last few hundred iterations. In a normal Bayesian setup, plotting the associated log-likelihood over time also helps to assess convergence to the posterior distribution.
 
