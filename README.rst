@@ -21,7 +21,7 @@ Installing the `repository version <https://pypi.org/project/econpizza/>`_ from 
 
    pip install emcwrap
   
-There exists a complementary stand-alone implementation in `Julia language <https://github.com/gboehl/ADEMC.jl>`_.
+There exists a complementary stand-alone implementation in `Julia language <https://github.com/gboehl/DIMESampler.jl>`_.
 
    
 Usage
@@ -44,7 +44,7 @@ The proposal can be used directly as a drop-in replacement for `emcee <https://g
     ...
     # off you go sampling
  
-The rest of the usage is hence analoge to Emcee, see e.g. `this tutorial <https://emcee.readthedocs.io/en/stable/tutorials/quickstart/>`_. The parameters specific to the ``ADEMove`` are documented `here <https://emcwrap.readthedocs.io/en/latest/modules.html#module-emcwrap.moves>`_.
+The rest of the usage is hence analoge to Emcee, see e.g. `this tutorial <https://emcee.readthedocs.io/en/stable/tutorials/quickstart/>`_. The parameters specific to the ``DIMEMove`` are documented `here <https://emcwrap.readthedocs.io/en/latest/modules.html#module-emcwrap.moves>`_.
 
 The provided tools for Bayesian analysis are ready-to-use, but largely undocumented. Find the module documentation here: https://emcwrap.readthedocs.io/en/latest/modules.html
 
