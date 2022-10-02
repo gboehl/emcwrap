@@ -3,7 +3,8 @@
 
 import os
 import numpy as np
-import emcwrap as ew
+from .moves import DIMEMove
+from .sampler import run_mcmc
 from scipy.stats import multivariate_normal, norm
 
 filepath = os.path.dirname(__file__)
@@ -41,7 +42,7 @@ def test_all(create=False):
 
     log_prob = create_test_func(ndim, weight, m, cov_scale)
 
-    moves = ew.DIMEMove(aimh_prob=.1, df_proposal_dist=10)
+    moves = DIMEMove(aimh_prob=.1, df_proposal_dist=10)
     ndim = 35
     nchain = ndim*5
     niter = 300
@@ -50,7 +51,7 @@ def test_all(create=False):
     initcov = np.eye(ndim)*np.sqrt(2)
     initchain = multivariate_normal(mean=initmean, cov=initcov).rvs(nchain)
 
-    sampler = ew.run_mcmc(log_prob, niter, p0=initchain, moves=moves)
+    sampler = run_mcmc(log_prob, niter, p0=initchain, moves=moves)
     chain = sampler.get_chain()
 
     path = os.path.join(filepath, "test_storage", "median.npy")
@@ -61,5 +62,4 @@ def test_all(create=False):
         print(f'Test file updated at {path}')
     else:
         test_median = np.load(path)
-        # this changes across architecture
-        np.testing.assert_almost_equal(median, test_median, digit=5)
+        np.testing.assert_almost_equal(median, test_median)
