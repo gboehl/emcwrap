@@ -62,4 +62,5 @@ def test_all(create=False):
         print(f'Test file updated at {path}')
     else:
         test_median = np.load(path)
-        np.testing.assert_allclose(median, test_median, rtol=1e-5)
+        # gives slightly different estimates depending on architecture
+        np.testing.assert_allclose(median, test_median, rtol=5e-4)
