@@ -46,7 +46,109 @@ The proposal can be used directly as a drop-in replacement for `emcee <https://g
  
 The rest of the usage is hence analoge to Emcee, see e.g. `this tutorial <https://emcee.readthedocs.io/en/stable/tutorials/quickstart/>`_. The parameters specific to the ``DIMEMove`` are documented `here <https://emcwrap.readthedocs.io/en/latest/modules.html#module-emcwrap.moves>`_.
 
-The provided tools for Bayesian analysis are ready-to-use, but largely undocumented. Find the module documentation here: https://emcwrap.readthedocs.io/en/latest/modules.html
+The provided tools for Bayesian analysis are ready-to-use, but largely undocumented. Find the module documentation here: https://emcwrap.readthedocs.io/en/latest/modules.html.
+
+Lets look at an example. Define a distribution function for that purpose:
+
+.. code-block:: python
+
+    # some import
+    import emcwrap as ew
+    import numpy as np
+    import scipy.stats as ss
+    from emcwrap.test_all import create_test_func, marginal_pdf_test_func
+    from grgrlib import figurator
+
+    # make it reproducible
+    np.random.seed(0)
+
+    # define distribution
+    m = 2
+    cov_scale = 0.05
+    weight = 0.33
+    ndim = 35
+
+    log_prob = create_test_func(ndim, weight, m, cov_scale)
+
+``log_prob`` will now return the log-PDF of a 35-dimensional bimodal Gaussian mixture. Next, define the initial ensemble. In a Bayesian setup, a good initial ensemble would be a sample from the prior distribution. Here, we will go for a sample from a rather flat Gaussian distribution.
+
+
+.. code-block:: python
+
+    # number of chains and number of iterations
+    nchain = ndim * 5
+    niter = 3000
+
+    # initial ensemble
+    initmean = np.zeros(ndim)
+    initcov = np.eye(ndim) * np.sqrt(2)
+    initchain = ss.multivariate_normal(mean=initmean, cov=initcov).rvs(nchain)
+
+Setting the number of parallel chains to ``5*ndim`` is a sane default. For highly irregular distributions with several modes you should use more chains. Very simple distributions can go with less. 
+
+Now let the sampler run for 3000 iterations.
+
+.. code-block:: python
+
+    # use the DIME proposal
+    moves = ew.DIMEMove(aimh_prob=0.1, df_proposal_dist=10)
+    sampler = ew.run_mcmc(log_prob, niter, p0=initchain, moves=moves)
+
+    # get elements
+    chain = sampler.get_chain()
+    lprob = sampler.get_log_prob()
+
+.. code-block::
+
+    [ll/MAF: 11.598(4e+00)/23%]: 100%|████████████████████ 3000/3000 [00:18<00:00, 164.70sample(s)/s]
+
+The setting of ``aimh_prob`` is actually the default. For less complex distributions (e.g. distributions closer to Gaussian) a higher value can be chosen, which accelerates burn-in. Note that if you wish to use emcee directly instead of the wrapper, you could simply do the following, which will give you the same result:
+
+.. code-block:: python
+
+    import emcee
+    sampler = emcee.EnsembleSampler(nchain, ndim, log_prob, moves=moves)
+    sampler.run_mcmc(initchain, int(niter), progress=True)
+
+Lets plot the marginal distribution along the first dimension (remember that this actually is a 35-dimensional distribution).
+
+.. code-block:: python
+
+    figs, axs = figurator(1, 1, 1)
+    axs[0].hist(chain[-int(niter / 3) :, :, 0].flatten(), bins=50, density=True, alpha=0.2, label="Sample")
+    xlim = axs[0].get_xlim()
+    x = np.linspace(xlim[0], xlim[1], 100)
+    axs[0].plot(x, ss.norm(scale=2**0.25).pdf(x), "--", label="Initialization")
+    axs[0].plot(x, ss.t(df=10, loc=moves.mean[0], scale=moves.cov[0, 0] ** 0.5).pdf(x), ":", label="Final proposals")
+    axs[0].plot(x, marginal_pdf_test_func(x, cov_scale, m, weight), label="Target")
+    axs[0].legend()
+
+.. image:: https://github.com/gboehl/emcwrap/blob/main/docs/dist.png?raw=true
+  :width: 800
+  :alt: Sample and target distribution
+
+To ensure propper mixing, let us also have a look at the MCMC traces, again focussing on the first dimension. Note how chains are also switching between the two modes because of the global proposal kernel.
+
+.. code-block:: python
+
+    figs, axs = figurator(1, 1, 1)
+    axs[0].plot(chain[:, :, 0], alpha=0.05, c="C0")
+
+.. image:: https://github.com/gboehl/emcwrap/blob/main/docs/traces.png?raw=true
+  :width: 800
+  :alt: MCMC traces
+
+While DIME is an MCMC sampler, it can straightforwardy be used as a global optimization routine. To this end, specify some broad starting region (in a non-Bayesian setup there is no prior) and let the sampler run for an extended number of iterations. Finally, assess whether the maximum value per ensemble did not change much in the last few hundered iterations. In a normal Bayesian setup, plotting the associated log-likelhood over time also helps to assess convergence to the posterior distribution.
+
+.. code-block:: python
+
+    figs, axs = figurator(1, 1, 1)
+    axs[0].plot(lprob, alpha=0.05, c="C0")
+    axs[0].plot(np.arange(niter), np.max(lprob) * np.ones(niter), "--", c="C1")
+
+.. image:: https://github.com/gboehl/emcwrap/blob/main/docs/lprobs.png?raw=true
+  :width: 800
+  :alt: Log-likelihoods
 
 References
 ----------

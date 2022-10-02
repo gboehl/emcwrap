@@ -4,7 +4,7 @@
 import os
 import numpy as np
 import emcwrap as ew
-from scipy.stats import multivariate_normal as mvn
+from scipy.stats import multivariate_normal, norm
 
 np.random.seed(0)
 
@@ -19,7 +19,7 @@ def create_test_func(ndim, weight, distance, cov_scale):
     lw0 = np.log(weight)
     lw1 = np.log(1-weight)
 
-    dist = mvn(np.zeros(ndim), cov)
+    dist = multivariate_normal(np.zeros(ndim), cov)
 
     def log_prob(p):
         return np.logaddexp(lw0 + dist.logpdf(p + mean), lw1 + dist.logpdf(p - mean))
@@ -28,8 +28,8 @@ def create_test_func(ndim, weight, distance, cov_scale):
 
 
 def marginal_pdf_test_func(x, cov_scale, m, weight):
-    norm = ss.norm(scale=np.sqrt(cov_scale))
-    return (1-weight)*norm.pdf(x-m/2) + weight*norm.pdf(x+m/2)
+    normal = norm(scale=np.sqrt(cov_scale))
+    return (1-weight)*normal.pdf(x-m/2) + weight*normal.pdf(x+m/2)
 
 def test_all(create=False):
 
@@ -50,7 +50,7 @@ def test_all(create=False):
 
     initmean = np.zeros(ndim)
     initcov = np.eye(ndim)*np.sqrt(2)
-    initchain = mvn(mean=initmean, cov=initcov).rvs(nchain)
+    initchain = multivariate_normal(mean=initmean, cov=initcov).rvs(nchain)
 
     sampler = ew.run_mcmc(log_prob, niter, p0=initchain, moves=moves)
     chain = sampler.get_chain()
