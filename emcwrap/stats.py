@@ -6,8 +6,11 @@ import emcee
 import numpy as np
 import pandas as pd
 import scipy.stats as ss
-from grgrlib.njitted import mvn_logpdf as logpdf
 
+try:
+    from grgrlib.njitted import mvn_logpdf as logpdf
+except ModuleNotFoundError:
+    logpdf = lambda drv, cmean, ccov: ss.multivariate_normal(mean=cmean, cov=ccov).logpdf(drv)
 
 def mdd_laplace(chain, lprobs, calc_hess=False):
     """Approximate the marginal data density useing the LaPlace method."""
