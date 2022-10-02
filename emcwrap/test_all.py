@@ -42,8 +42,6 @@ def test_all(create=False):
 
     log_prob = create_test_func(ndim, weight, m, cov_scale)
 
-    moves = DIMEMove(aimh_prob=.1, df_proposal_dist=10)
-    ndim = 35
     nchain = ndim*5
     niter = 300
 
@@ -51,6 +49,7 @@ def test_all(create=False):
     initcov = np.eye(ndim)*np.sqrt(2)
     initchain = multivariate_normal(mean=initmean, cov=initcov).rvs(nchain)
 
+    moves = DIMEMove(aimh_prob=.1, df_proposal_dist=10)
     sampler = run_mcmc(log_prob, niter, p0=initchain, moves=moves)
     chain = sampler.get_chain()
 
@@ -63,4 +62,5 @@ def test_all(create=False):
     else:
         test_median = np.load(path)
         # gives slightly different estimates depending on architecture
-        np.testing.assert_allclose(median, test_median, rtol=5e-4)
+        # np.testing.assert_allclose(median, test_median, rtol=5e-4)
+        np.testing.assert_allclose(median, test_median)
