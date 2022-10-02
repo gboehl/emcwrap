@@ -6,8 +6,6 @@ import numpy as np
 import emcwrap as ew
 from scipy.stats import multivariate_normal, norm
 
-np.random.seed(0)
-
 filepath = os.path.dirname(__file__)
 
 def create_test_func(ndim, weight, distance, cov_scale):
@@ -33,7 +31,7 @@ def marginal_pdf_test_func(x, cov_scale, m, weight):
 
 def test_all(create=False):
 
-    # np.random.seed(0)
+    np.random.seed(0)
 
     # define distribution
     m = 2
