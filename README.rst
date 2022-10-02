@@ -48,7 +48,7 @@ The rest of the usage is hence analoge to Emcee, see e.g. `this tutorial <https:
 
 The provided tools for Bayesian analysis are ready-to-use, but largely undocumented. Find the module documentation here: https://emcwrap.readthedocs.io/en/latest/modules.html.
 
-Lets look at an example. Define a distribution function for that purpose:
+Lets look at an example. Let's define a nice and challenging distribution:
 
 .. code-block:: python
 
