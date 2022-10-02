@@ -63,5 +63,6 @@ def test_all(create=False):
         print(f'Test file updated at {path}')
     else:
         test_median = np.load(path)
+        # result may change across architecture
         np.testing.assert_almost_equal(median, test_median, decimal=4)
 
