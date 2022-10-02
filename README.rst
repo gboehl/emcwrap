@@ -1,9 +1,9 @@
 emcwrap
 =======
 
-**Collection of tools for Bayesian inference using DIME MCMC**
+**Collection of tools for Bayesian inference using DIME MCMC sampling**
 
-This provides the Differential-Independence Mixture Ensemble (DIME) proposal together with a nice set of statistical tools for Bayesian analysis. DIME MCMC (previously ADEMC) is developed in `Ensemble MCMC Sampling for DSGE Models <https://gregorboehl.com/live/ademc_boehl.pdf>`_. *(Gregor Boehl, 2022, CRC 224 discussion paper series)*.
+This provides the Differential-Independence Mixture Ensemble (DIME) MCMC sampler together with a nice set of statistical tools for Bayesian analysis. DIME MCMC (previously ADEMC) is developed in `Ensemble MCMC Sampling for DSGE Models <https://gregorboehl.com/live/ademc_boehl.pdf>`_. *(Gregor Boehl, 2022, CRC 224 discussion paper series)*.
 
 The sampler has a series of advantages over conventional samplers:
 
