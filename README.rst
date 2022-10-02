@@ -119,7 +119,7 @@ Lets plot the marginal distribution along the first dimension (remember that thi
     xlim = axs[0].get_xlim()
     x = np.linspace(xlim[0], xlim[1], 100)
     axs[0].plot(x, ss.norm(scale=2**0.25).pdf(x), "--", label="Initialization")
-    axs[0].plot(x, ss.t(df=10, loc=moves.mean[0], scale=moves.cov[0, 0] ** 0.5).pdf(x), ":", label="Final proposals")
+    axs[0].plot(x, ss.t(df=10, loc=moves.prop_mean[0], scale=moves.prop_cov[0, 0] ** 0.5).pdf(x), ":", label="Final proposals")
     axs[0].plot(x, marginal_pdf_test_func(x, cov_scale, m, weight), label="Target")
     axs[0].legend()
 

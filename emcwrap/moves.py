@@ -50,10 +50,10 @@ class DIMEMove(RedBlueMove):
             # pure MAGIC
             self.g0 = 2.38 / np.sqrt(2 * npar)
 
-        if not hasattr(self, "cov"):
+        if not hasattr(self, "prop_cov"):
             # even more MAGIC
-            self.cov = np.eye(npar)
-            self.mean = np.zeros(npar)
+            self.prop_cov = np.eye(npar)
+            self.prop_mean = np.zeros(npar)
             self.accepted = np.ones(nchain, dtype=bool)
             self.cumlweight = -np.inf
 
@@ -89,10 +89,10 @@ class DIMEMove(RedBlueMove):
 
         # update AIMH proposal distribution
         newcumlweight = np.logaddexp(self.cumlweight, lweight)
-        self.cov = np.exp(self.cumlweight - newcumlweight) * \
-            self.cov + np.exp(lweight - newcumlweight) * ncov
-        self.mean = np.exp(self.cumlweight - newcumlweight) * \
-            self.mean + np.exp(lweight - newcumlweight) * nmean
+        self.prop_cov = np.exp(self.cumlweight - newcumlweight) * \
+            self.prop_cov + np.exp(lweight - newcumlweight) * ncov
+        self.prop_mean = np.exp(self.cumlweight - newcumlweight) * \
+            self.prop_mean + np.exp(lweight - newcumlweight) * nmean
         self.cumlweight = newcumlweight
 
         # draw chains for AIMH sampling
@@ -100,7 +100,7 @@ class DIMEMove(RedBlueMove):
 
         # draw alternative candidates and calculate their proposal density
         dist = ss.multivariate_t(
-            self.mean, self.cov * (self.dft - 2) / self.dft, df=self.dft, allow_singular=True)
+            self.prop_mean, self.prop_cov * (self.dft - 2) / self.dft, df=self.dft, allow_singular=True)
         xcand = dist.rvs(sum(xchnge), random_state=random)
         lprop_old = dist.logpdf(x[xchnge])
         lprop_new = dist.logpdf(xcand)
