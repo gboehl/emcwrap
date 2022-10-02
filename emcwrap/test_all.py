@@ -62,4 +62,4 @@ def test_all(create=False):
         print(f'Test file updated at {path}')
     else:
         test_median = np.load(path)
-        assert median == test_median
+        assert np.allclose(median, test_median)
