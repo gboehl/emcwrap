@@ -61,6 +61,8 @@ def test_all(create=False):
         print(f'Test file updated at {path}')
     else:
         test_median = np.load(path)
-        # result may change across architecture
-        np.testing.assert_almost_equal(median, test_median, decimal=4)
+        # result may change across architecture. This is necessary when using result from arch:
+        # np.testing.assert_almost_equal(median, test_median, decimal=4)
+        # but result from ubuntu seems fine:
+        np.testing.assert_almost_equal(median, test_median)
 
