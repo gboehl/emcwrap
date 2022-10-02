@@ -6,6 +6,7 @@ import numpy as np
 import emcwrap as ew
 from scipy.stats import multivariate_normal as mvn
 
+np.random.seed(0)
 
 filepath = os.path.dirname(__file__)
 
@@ -32,7 +33,7 @@ def marginal_pdf_test_func(x, cov_scale, m, weight):
 
 def test_all(create=False):
 
-    np.random.seed(0)
+    # np.random.seed(0)
 
     # define distribution
     m = 2
@@ -62,5 +63,6 @@ def test_all(create=False):
         print(f'Test file updated at {path}')
     else:
         test_median = np.load(path)
-        np.testing.assert_almost_equal(median, test_median, decimal=3)
+        # np.testing.assert_almost_equal(median, test_median, decimal=3)
+        np.testing.assert_almost_equal(median, test_median)
 
