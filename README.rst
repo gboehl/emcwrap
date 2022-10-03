@@ -102,7 +102,9 @@ Now let the sampler run for 3000 iterations.
 
     [ll/MAF: 11.598(4e+00)/23%]: 100%|████████████████████ 3000/3000 [00:18<00:00, 164.70sample(s)/s]
 
-The setting of ``aimh_prob`` is actually the default. For less complex distributions (e.g. distributions closer to Gaussian) a higher value can be chosen, which accelerates burn-in. Note that if you wish to use emcee directly instead of the wrapper, you could simply do the following, which will give you the same result:
+The setting of ``aimh_prob`` is the actual default value. For less complex distributions (e.g. distributions closer to Gaussian) a higher value can be chosen, which accelerates burn-in. The information in the progress bar has the structure `[ll/MAF: <maximum log-prob>(<standard deviation of log-prob>)/<mean acceptance fraction>]...`.
+
+Note that if you wish to use emcee directly instead of the wrapper, you could simply do the following, which will give you the same result:
 
 .. code-block:: python
 
