@@ -10,7 +10,9 @@ import scipy.stats as ss
 try:
     from grgrlib.njitted import mvn_logpdf as logpdf
 except ModuleNotFoundError:
-    logpdf = lambda drv, cmean, ccov: ss.multivariate_normal(mean=cmean, cov=ccov).logpdf(drv)
+    def logpdf(drv, cmean, ccov): return ss.multivariate_normal(
+        mean=cmean, cov=ccov).logpdf(drv)
+
 
 def mdd_laplace(chain, lprobs, calc_hess=False):
     """Approximate the marginal data density useing the LaPlace method."""
@@ -24,7 +26,11 @@ def mdd_laplace(chain, lprobs, calc_hess=False):
 
     if calc_hess:
 
-        from numdifftools import Hessian
+        try:
+            from numdifftools import Hessian
+        except ModuleNotFoundError:
+            raise ModuleNotFoundError(
+                "`mdd_laplace` with `calc_hess=True` requires the numdifftools package to be installed.")
 
         np.warnings.filterwarnings("ignore")
         hh = Hessian(func)(mode_x)

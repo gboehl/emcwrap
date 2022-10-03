@@ -30,7 +30,6 @@ setup(
         "tqdm",
         "emcee",
         "pandas",
-        "numdifftools",
         "matplotlib",
         "grgrlib>=0.1.15",
     ],
