@@ -102,7 +102,7 @@ Now let the sampler run for 3000 iterations.
 
     [ll/MAF: 11.598(4e+00)/23%]: 100%|████████████████████ 3000/3000 [00:18<00:00, 164.70sample(s)/s]
 
-The setting of ``aimh_prob`` is the actual default value. For less complex distributions (e.g. distributions closer to Gaussian) a higher value can be chosen, which accelerates burn-in. The information in the progress bar has the structure `[ll/MAF: <maximum log-prob>(<standard deviation of log-prob>)/<mean acceptance fraction>]...`.
+The setting of ``aimh_prob`` is the actual default value. For less complex distributions (e.g. distributions closer to Gaussian) a higher value can be chosen, which accelerates burn-in. The information in the progress bar has the structure ``[ll/MAF: <maximum log-prob>(<standard deviation of log-prob>)/<mean acceptance fraction>]...``.
 
 Note that if you wish to use emcee directly instead of the wrapper, you could simply do the following, which will give you the same result:
 
@@ -146,7 +146,7 @@ To ensure proper mixing, let us also have a look at the MCMC traces, again focus
   :width: 800
   :alt: MCMC traces
 
-Note how chains are also switching between the two modes because of the global proposal kernel.
+Note how chains are also switching between the three modes because of the global proposal kernel.
 
 While DIME is an MCMC sampler, it can straightforwardly be used as a global optimization routine. To this end, specify some broad starting region (in a non-Bayesian setup there is no prior) and let the sampler run for an extended number of iterations. Finally, assess whether the maximum value per ensemble did not change much in the last few hundred iterations. In a normal Bayesian setup, plotting the associated log-likelihood over time also helps to assess convergence to the posterior distribution.
 
