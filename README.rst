@@ -20,10 +20,10 @@ Installing the `repository version <https://pypi.org/project/econpizza/>`_ from 
 .. code-block:: bash
 
    pip install emcwrap
-  
+
 There exists a complementary stand-alone implementation in `Julia language <https://github.com/gboehl/DIMESampler.jl>`_.
 
-   
+
 Usage
 -----
 
@@ -33,19 +33,19 @@ The proposal can be used directly as a drop-in replacement for `emcee <https://g
 
     import emcee
     from emcwrap import DIMEMove
-    
+
     move = DIMEMove(aimh_prob=.1, df_proposal_dist=10)
-    
+
     ...
     def log_prob(x):
       ...
     # define your density function, the number of chains `nchain` etc...
     ...
-    
+
     sampler = emcee.EnsembleSampler(nchain, ndim, log_prob, moves=move)
     ...
     # off you go sampling
- 
+
 The rest of the usage is hence analoge to Emcee, see e.g. `this tutorial <https://emcee.readthedocs.io/en/stable/tutorials/quickstart/>`_. The parameters specific to the ``DIMEMove`` are documented `here <https://emcwrap.readthedocs.io/en/latest/modules.html#module-emcwrap.moves>`_.
 
 The provided tools for Bayesian analysis are ready-to-use, but largely undocumented. Find the module documentation here: https://emcwrap.readthedocs.io/en/latest/modules.html.
@@ -73,7 +73,7 @@ Lets look at an example. Let's define a nice and challenging distribution:
 
     log_prob = create_test_func(ndim, weight, m, cov_scale)
 
-``log_prob`` will now return the log-PDF of a 35-dimensional Gaussian mixture with **three separate modes**. 
+``log_prob`` will now return the log-PDF of a 35-dimensional Gaussian mixture with **three separate modes**.
 
 Next, define the initial ensemble. In a Bayesian setup, a good initial ensemble would be a sample from the prior distribution. Here, we will go for a sample from a rather flat Gaussian distribution.
 
@@ -88,7 +88,7 @@ Next, define the initial ensemble. In a Bayesian setup, a good initial ensemble 
     initcov = np.eye(ndim) * np.sqrt(2)
     initchain = ss.multivariate_normal(mean=initmean, cov=initcov).rvs(nchain)
 
-Setting the number of parallel chains to ``5*ndim`` is a sane default. For highly irregular distributions with several modes you should use more chains. Very simple distributions can go with less. 
+Setting the number of parallel chains to ``5*ndim`` is a sane default. For highly irregular distributions with several modes you should use more chains. Very simple distributions can go with less.
 
 Now let the sampler run for 3000 iterations.
 
@@ -122,7 +122,7 @@ Lets plot the marginal distribution along the first dimension (remember that thi
 
     # plotting
     figs, axs = figurator(1, 1, 1, figsize=(9,6))
-    axs[0].hist(chain[-int(niter / 3) :, :, 0].flatten(), bins=50, density=True, alpha=0.2, label="Sample")
+    axs[0].hist(chain[-niter//2 :, :, 0].flatten(), bins=50, density=True, alpha=0.2, label="Sample")
     xlim = axs[0].get_xlim()
     x = np.linspace(xlim[0], xlim[1], 100)
     axs[0].plot(x, ss.norm(scale=np.sqrt(initvar)).pdf(x), "--", label="Initialization")
@@ -135,7 +135,7 @@ Lets plot the marginal distribution along the first dimension (remember that thi
   :width: 800
   :alt: Sample and target distribution
 
-To ensure proper mixing, let us also have a look at the MCMC traces, again focussing on the first dimension. 
+To ensure proper mixing, let us also have a look at the MCMC traces, again focussing on the first dimension.
 
 .. code-block:: python
 
@@ -145,7 +145,7 @@ To ensure proper mixing, let us also have a look at the MCMC traces, again focus
 .. image:: https://github.com/gboehl/emcwrap/blob/main/docs/traces.png?raw=true
   :width: 800
   :alt: MCMC traces
- 
+
 Note how chains are also switching between the two modes because of the global proposal kernel.
 
 While DIME is an MCMC sampler, it can straightforwardly be used as a global optimization routine. To this end, specify some broad starting region (in a non-Bayesian setup there is no prior) and let the sampler run for an extended number of iterations. Finally, assess whether the maximum value per ensemble did not change much in the last few hundred iterations. In a normal Bayesian setup, plotting the associated log-likelihood over time also helps to assess convergence to the posterior distribution.
@@ -173,4 +173,3 @@ If you are using this software in your research, please cite
     year          = 2022,
     institution   = {CRC224 discussion paper series}
     }
-
