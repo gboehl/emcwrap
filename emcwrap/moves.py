@@ -100,7 +100,7 @@ class DIMEMove(RedBlueMove):
 
         # draw alternative candidates and calculate their proposal density
         dist = ss.multivariate_t(
-            self.prop_mean, self.prop_cov * (self.dft - 2) / self.dft, df=self.dft, allow_singular=True)
+            self.prop_mean.real, self.prop_cov.real * (self.dft - 2) / self.dft, df=self.dft, allow_singular=True)
         xcand = dist.rvs(sum(xchnge), random_state=random)
         lprop_old = dist.logpdf(x[xchnge])
         lprop_new = dist.logpdf(xcand)
