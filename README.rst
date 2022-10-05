@@ -58,7 +58,7 @@ Lets look at an example. Let's define a nice and challenging distribution:
     import emcwrap as ew
     import numpy as np
     import scipy.stats as ss
-    from emcwrap.test_all import create_test_func, marginal_pdf_test_func
+    from emcwrap.test_all import _create_test_func, _marginal_pdf_test_func
     from grgrlib import figurator
 
     # make it reproducible
@@ -71,7 +71,7 @@ Lets look at an example. Let's define a nice and challenging distribution:
     ndim = 35
     initvar = np.sqrt(2)
 
-    log_prob = create_test_func(ndim, weight, m, cov_scale)
+    log_prob = _create_test_func(ndim, weight, m, cov_scale)
 
 ``log_prob`` will now return the log-PDF of a 35-dimensional Gaussian mixture with **three separate modes**.
 
@@ -127,7 +127,7 @@ Lets plot the marginal distribution along the first dimension (remember that thi
     x = np.linspace(xlim[0], xlim[1], 100)
     axs[0].plot(x, ss.norm(scale=np.sqrt(initvar)).pdf(x), "--", label="Initialization")
     axs[0].plot(x, ss.t(df=10, loc=moves.prop_mean[0], scale=moves.prop_cov[0, 0] ** 0.5).pdf(x), ":", label="Final proposals")
-    axs[0].plot(x, marginal_pdf_test_func(x, cov_scale, m, weight), label="Target")
+    axs[0].plot(x, _marginal_pdf_test_func(x, cov_scale, m, weight), label="Target")
     axs[0].legend()
 
 

@@ -95,21 +95,22 @@ class DIMEMove(RedBlueMove):
             self.prop_mean + np.exp(lweight - newcumlweight) * nmean
         self.cumlweight = newcumlweight
 
-        # draw chains for AIMH sampling
-        xchnge = random.rand(nchain) <= self.aimh_prob
-
-        # draw alternative candidates and calculate their proposal density
+        # update AIMH distribution
         dist = ss.multivariate_t(
             self.prop_mean.real, self.prop_cov.real * (self.dft - 2) / self.dft, df=self.dft, allow_singular=True)
+
+        # draw chains for AIMH sampling
+        xchnge = random.rand(nchain) <= self.aimh_prob
         xcand = dist.rvs(sum(xchnge), random_state=random)
+        # draw alternative candidates and calculate their proposal density
         lprop_old = dist.logpdf(x[xchnge])
         lprop_new = dist.logpdf(xcand)
 
         # update proposals and factors
-        q[xchnge] = xcand
+        q[xchnge, :] = np.reshape(xcand, (-1, npar))
         factors[xchnge] = lprop_old - lprop_new
 
         return q, factors
 
 
-ADEMove = DIMEMove  # set alias for compatibility
+ADEMove = DIMEMove  # set alias for backwards compatibility

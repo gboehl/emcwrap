@@ -7,10 +7,13 @@ from .moves import DIMEMove
 from .sampler import run_mcmc
 from scipy.stats import multivariate_normal, norm
 from scipy.special import logsumexp
+from emcee.tests.integration.test_proposal import _test_normal, _test_uniform
+
 
 filepath = os.path.dirname(__file__)
 
-def create_test_func(ndim, weight, distance, cov_scale):
+
+def _create_test_func(ndim, weight, distance, cov_scale):
 
     cov = np.eye(ndim)*cov_scale
     mean = np.zeros(ndim)
@@ -28,14 +31,14 @@ def create_test_func(ndim, weight, distance, cov_scale):
     return log_prob
 
 
-def marginal_pdf_test_func(x, cov_scale, m, weight):
+def _marginal_pdf_test_func(x, cov_scale, m, weight):
 
     normal = norm(scale=np.sqrt(cov_scale))
 
     return weight[0]*normal.pdf(x+m) + weight[1]*normal.pdf(x) + (1-weight[0]-weight[1])*normal.pdf(x-m)
 
 
-def test_all(create=False):
+def test_example(create=False):
 
     np.random.seed(0)
 
@@ -45,7 +48,7 @@ def test_all(create=False):
     weight = (0.33, 0.1)
     ndim = 35
 
-    log_prob = create_test_func(ndim, weight, m, cov_scale)
+    log_prob = _create_test_func(ndim, weight, m, cov_scale)
 
     nchain = ndim*5
     niter = 300
@@ -59,7 +62,7 @@ def test_all(create=False):
     chain = sampler.get_chain()
 
     path = os.path.join(filepath, "test_storage", "median.npy")
-    median = np.median(chain[-int(niter/3):,:,0])
+    median = np.median(chain[-int(niter/3):, :, 0])
 
     if create:
         np.save(path, median)
@@ -68,3 +71,11 @@ def test_all(create=False):
         test_median = np.load(path)
         # gives slightly different estimates depending on architecture
         np.testing.assert_allclose(median, test_median, rtol=5e-4)
+
+
+def test_normal_dime(**kwargs):
+    _test_normal(DIMEMove(), **kwargs)
+
+
+def test_uniform_dime(**kwargs):
+    _test_uniform(DIMEMove(), **kwargs)
