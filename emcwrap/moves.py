@@ -28,7 +28,7 @@ class DIMEMove(RedBlueMove):
         self,
         sigma=1.0e-5,
         gamma=None,
-        aimh_prob=0.05,
+        aimh_prob=0.1,
         df_proposal_dist=10,
         **kwargs
     ):
