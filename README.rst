@@ -34,7 +34,7 @@ The proposal can be used directly as a drop-in replacement for `emcee <https://g
     import emcee
     from emcwrap import DIMEMove
 
-    move = DIMEMove(aimh_prob=.1, df_proposal_dist=10)
+    move = DIMEMove()
 
     ...
     def log_prob(x):
@@ -81,7 +81,7 @@ Next, define the initial ensemble. In a Bayesian setup, a good initial ensemble 
 
     # number of chains and number of iterations
     nchain = ndim * 5
-    niter = 3000
+    niter = 5000
 
     # initial ensemble
     initmean = np.zeros(ndim)
@@ -90,7 +90,7 @@ Next, define the initial ensemble. In a Bayesian setup, a good initial ensemble 
 
 Setting the number of parallel chains to ``5*ndim`` is a sane default. For highly irregular distributions with several modes you should use more chains. Very simple distributions can go with less.
 
-Now let the sampler run for 3000 iterations.
+Now let the sampler run for 5000 iterations.
 
 .. code-block:: python
 
@@ -100,7 +100,7 @@ Now let the sampler run for 3000 iterations.
 
 .. code-block::
 
-    [ll/MAF: 11.598(4e+00)/23%]: 100%|████████████████████ 3000/3000 [00:18<00:00, 164.70sample(s)/s]
+    [ll/MAF: 11.598(4e+00)/23%]: 100%|████████████████████ 5000/5000 [00:18<00:00, 164.70sample(s)/s]
 
 The setting of ``aimh_prob`` is the actual default value. For less complex distributions (e.g. distributions closer to Gaussian) a higher value can be chosen, which accelerates burn-in. The information in the progress bar has the structure ``[ll/MAF: <maximum log-prob>(<standard deviation of log-prob>)/<mean acceptance fraction>]...``.
 
@@ -122,7 +122,7 @@ Lets plot the marginal distribution along the first dimension (remember that thi
 
     # plotting
     figs, axs = figurator(1, 1, 1, figsize=(9,6))
-    axs[0].hist(chain[-niter//2 :, :, 0].flatten(), bins=50, density=True, alpha=0.2, label="Sample")
+    axs[0].hist(chain[-niter//3 :, :, 0].flatten(), bins=50, density=True, alpha=0.2, label="Sample")
     xlim = axs[0].get_xlim()
     x = np.linspace(xlim[0], xlim[1], 100)
     axs[0].plot(x, ss.norm(scale=np.sqrt(initvar)).pdf(x), "--", label="Initialization")
