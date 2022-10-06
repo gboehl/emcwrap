@@ -21,7 +21,7 @@ Installing the `repository version <https://pypi.org/project/econpizza/>`_ from 
 
    pip install emcwrap
 
-There exists a complementary stand-alone implementation in `Julia language <https://github.com/gboehl/DIMESampler.jl>`_.
+There exists complementary stand-alone implementations in `Julia language <https://github.com/gboehl/DIMESampler.jl>`_ and `in matlab <https://github.com/gboehl/dime-mcmc-matlab>`_.
 
 
 Usage
