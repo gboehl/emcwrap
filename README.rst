@@ -122,7 +122,7 @@ Lets plot the marginal distribution along the first dimension (remember that thi
 
     # plotting
     figs, axs = figurator(1, 1, 1, figsize=(9,6))
-    axs[0].hist(chain[-niter//3 :, :, 0].flatten(), bins=50, density=True, alpha=0.2, label="Sample")
+    axs[0].hist(chain[-niter//2 :, :, 0].flatten(), bins=50, density=True, alpha=0.2, label="Sample")
     xlim = axs[0].get_xlim()
     x = np.linspace(xlim[0], xlim[1], 100)
     axs[0].plot(x, ss.norm(scale=np.sqrt(initvar)).pdf(x), "--", label="Initialization")
