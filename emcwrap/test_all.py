@@ -48,7 +48,7 @@ def test_example(create=False, seed=1234):
     cov_scale = 0.05
     weight = (0.33, 0.1)
     # ndim = 35
-    ndim = 3
+    ndim = 10
 
     log_prob = _create_test_func(ndim, weight, m, cov_scale)
 
