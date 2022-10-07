@@ -145,7 +145,7 @@ def get_prior_sample(frozen_prior, nsamples, check_func=False, seed=None, mapper
     """
 
     if seed is None:
-        seed = np.random.randint(2**63)
+        seed = np.random.randint(2**31)
 
     if check_func and not callable(check_func):
         raise Exception('`check_func` must be `False` or a callable')
@@ -153,7 +153,7 @@ def get_prior_sample(frozen_prior, nsamples, check_func=False, seed=None, mapper
     def runner(locseed):
 
         # distribute seed evenly
-        np.random.seed(seed + locseed)
+        np.random.seed((seed + locseed) % 2**31)
         done = False
         no = 0
 
