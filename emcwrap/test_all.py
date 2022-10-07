@@ -52,7 +52,6 @@ def test_example(create=False, seed=1234):
 
     nchain = ndim*5
     niter = 300
-    niter = 3
 
     initmean = np.zeros(ndim)
     initcov = np.eye(ndim)*np.sqrt(2)
@@ -70,7 +69,7 @@ def test_example(create=False, seed=1234):
         print(f'Test file updated at {path} with {median}')
     else:
         test_median = np.load(path)
-        np.testing.assert_allclose(median, test_median)
+        np.testing.assert_allclose(median, test_median, atol=1e-4)
 
 
 def test_normal_dime(**kwargs):
