@@ -95,13 +95,14 @@ class DIMEMove(RedBlueMove):
             self.prop_mean + np.exp(lweight - newcumlweight) * nmean
         self.cumlweight = newcumlweight
 
+        print(self.prop_mean.real)
+        print(self.prop_cov.real)
         # update AIMH distribution
         dist = ss.multivariate_t(
             self.prop_mean.real, self.prop_cov.real * (self.dft - 2) / self.dft, df=self.dft, allow_singular=True, seed=random)
 
         # draw chains for AIMH sampling
         rrr = random.rand(nchain) 
-        print(rrr)
         xchnge = rrr <= self.aimh_prob
         # xchnge = random.rand(nchain) <= self.aimh_prob
         # xcand = dist.rvs(sum(xchnge), random_state=random)
@@ -110,7 +111,6 @@ class DIMEMove(RedBlueMove):
         # draw alternative candidates and calculate their proposal density
         lprop_old = dist.logpdf(x[xchnge])
         lprop_new = dist.logpdf(xcand)
-        print(lprop_old)
         print(lprop_new)
 
         # update proposals and factors
