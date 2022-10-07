@@ -38,7 +38,8 @@ def _marginal_pdf_test_func(x, cov_scale, m, weight):
     return weight[0]*normal.pdf(x+m) + weight[1]*normal.pdf(x) + (1-weight[0]-weight[1])*normal.pdf(x-m)
 
 
-def dont_test_example(create=False, seed=1234):
+# def dont_test_example(create=False, seed=1234):
+def test_example(create=False, seed=1234):
 
     np.random.seed(seed)
 
@@ -46,12 +47,14 @@ def dont_test_example(create=False, seed=1234):
     m = 2
     cov_scale = 0.05
     weight = (0.33, 0.1)
-    ndim = 35
+    # ndim = 35
+    ndim = 3
 
     log_prob = _create_test_func(ndim, weight, m, cov_scale)
 
     nchain = ndim*5
-    niter = 300
+    # niter = 300
+    niter = 3
 
     initmean = np.zeros(ndim)
     initcov = np.eye(ndim)*np.sqrt(2)
@@ -70,7 +73,8 @@ def dont_test_example(create=False, seed=1234):
     else:
         test_median = np.load(path)
         # gives slightly different estimates depending on architecture
-        np.testing.assert_allclose(median, test_median, rtol=5e-4)
+        # np.testing.assert_allclose(median, test_median, rtol=5e-4)
+        np.testing.assert_allclose(median, test_median)
 
 
 def test_normal_dime(**kwargs):
