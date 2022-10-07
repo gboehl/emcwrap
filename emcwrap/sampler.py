@@ -10,17 +10,12 @@ from grgrlib import map2arr
 from .stats import summary
 
 
-def run_mcmc(lprob, nsteps, p0=None, moves=None, priors=None, prior_transform=None, backend=None, update_freq=False, resume=False, pool=None, report=None, description=None, temp=1, maintenance_interval=False, seed=None, verbose=False, **kwargs):
+def run_mcmc(lprob, nsteps, p0=None, moves=None, priors=None, prior_transform=None, backend=None, update_freq=False, resume=False, pool=None, report=None, description=None, temp=1, maintenance_interval=False, verbose=False, **kwargs):
     """Run the emcee sampler.
     """
 
-    if seed is None:
-        seed = 0
-
     if prior_transform is None:
         def prior_transform(x): return x
-
-    np.random.seed(seed)
 
     if isinstance(backend, str):
         backend = emcee.backends.HDFBackend(
@@ -150,7 +145,7 @@ def get_prior_sample(frozen_prior, nsamples, check_func=False, seed=None, mapper
     """
 
     if seed is None:
-        seed = 0
+        seed = np.random.randint(2**63)
 
     if check_func and not callable(check_func):
         raise Exception('`check_func` must be `False` or a callable')
