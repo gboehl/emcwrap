@@ -72,21 +72,16 @@ class DIMEMove(RedBlueMove):
 
         # differential evolution: draw the indices of the complementary chains
         i0 = np.arange(nchain) + random.randint(1, nchain, size=nchain)
-        print(i0)
         i1 = np.arange(nchain) + random.randint(1, nchain - 1, size=nchain)
-        print(i1)
         i1[i1 >= i0] += 1
         # add small noise and calculate proposal
         f = self.sigma * random.randn(nchain)
-        print(f)
         q = x + self.g0 * (x[i0 % nchain] - x[i1 % nchain]) + f[:, np.newaxis]
-        print(q)
         factors = np.zeros(nchain, dtype=np.float64)
 
         # log weight of current ensemble
         lweight = logsumexp(self.lprobs) + \
             np.log(sum(self.accepted)) - np.log(nchain)
-        print(lweight)
 
         # calculate stats for current ensemble
         ncov = np.cov(x.T, ddof=1)
@@ -99,9 +94,6 @@ class DIMEMove(RedBlueMove):
         self.prop_mean = np.exp(self.cumlweight - newcumlweight) * \
             self.prop_mean + np.exp(lweight - newcumlweight) * nmean
         self.cumlweight = newcumlweight
-        print(self.prop_mean)
-        print(self.prop_cov)
-        print(self.cumlweight)
 
         # update AIMH distribution
         dist = ss.multivariate_t(
