@@ -89,15 +89,14 @@ class DIMEMove(RedBlueMove):
 
         # update AIMH proposal distribution
         newcumlweight = np.logaddexp(self.cumlweight, lweight)
-        # self.prop_cov = np.exp(self.cumlweight - newcumlweight) * \
-            # self.prop_cov + np.exp(lweight - newcumlweight) * ncov
-        # self.prop_mean = np.exp(self.cumlweight - newcumlweight) * \
-            # self.prop_mean + np.exp(lweight - newcumlweight) * nmean
+        self.prop_cov = np.exp(self.cumlweight - newcumlweight) * \
+            self.prop_cov + np.exp(lweight - newcumlweight) * ncov
+        self.prop_mean = np.exp(self.cumlweight - newcumlweight) * \
+            self.prop_mean + np.exp(lweight - newcumlweight) * nmean
         self.cumlweight = newcumlweight
 
-        print(self.prop_mean.real)
-        print(self.prop_cov.real)
         # update AIMH distribution
+        # there seems to be an issue with using the random state
         dist = ss.multivariate_t(
             self.prop_mean.real, self.prop_cov.real * (self.dft - 2) / self.dft, df=self.dft, allow_singular=True, seed=random.randint(2*31))
 
@@ -108,11 +107,9 @@ class DIMEMove(RedBlueMove):
         # xcand = dist.rvs(sum(xchnge), random_state=random)
         xcand = dist.rvs(sum(xchnge))
         # xcand = dist.rvs(sum(xchnge), seed=0)
-        print(xcand)
         # draw alternative candidates and calculate their proposal density
         lprop_old = dist.logpdf(x[xchnge])
         lprop_new = dist.logpdf(xcand)
-        print(lprop_new)
 
         # update proposals and factors
         q[xchnge, :] = np.reshape(xcand, (-1, npar))
