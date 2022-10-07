@@ -58,7 +58,12 @@ def test_example(create=False):
     initchain = multivariate_normal(mean=initmean, cov=initcov).rvs(nchain)
 
     moves = DIMEMove(aimh_prob=.1, df_proposal_dist=10)
-    sampler = run_mcmc(log_prob, niter, p0=initchain, moves=moves)
+    # sampler = run_mcmc(log_prob, niter, p0=initchain, moves=moves)
+    # chain = sampler.get_chain()
+
+    import emcee
+    sampler = emcee.EnsembleSampler(nchain, ndim, log_prob, moves=moves)
+    sampler.run_mcmc(initchain, int(niter), progress=True)
     chain = sampler.get_chain()
 
     path = os.path.join(filepath, "test_storage", "median.npy")
