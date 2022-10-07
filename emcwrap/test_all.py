@@ -38,9 +38,9 @@ def _marginal_pdf_test_func(x, cov_scale, m, weight):
     return weight[0]*normal.pdf(x+m) + weight[1]*normal.pdf(x) + (1-weight[0]-weight[1])*normal.pdf(x-m)
 
 
-def test_example(create=False):
+def test_example(create=False, seed=1234):
 
-    np.random.seed(0)
+    np.random.seed(seed)
 
     # define distribution
     m = 2
@@ -55,15 +55,10 @@ def test_example(create=False):
 
     initmean = np.zeros(ndim)
     initcov = np.eye(ndim)*np.sqrt(2)
-    initchain = multivariate_normal(mean=initmean, cov=initcov).rvs(nchain)
+    initchain = multivariate_normal(mean=initmean, cov=initcov, seed=seed).rvs(nchain)
 
     moves = DIMEMove(aimh_prob=.1, df_proposal_dist=10)
-    # sampler = run_mcmc(log_prob, niter, p0=initchain, moves=moves)
-    # chain = sampler.get_chain()
-
-    import emcee
-    sampler = emcee.EnsembleSampler(nchain, ndim, log_prob, moves=moves)
-    sampler.run_mcmc(initchain, int(niter), progress=True)
+    sampler = run_mcmc(log_prob, niter, p0=initchain, moves=moves)
     chain = sampler.get_chain()
 
     path = os.path.join(filepath, "test_storage", "median.npy")
