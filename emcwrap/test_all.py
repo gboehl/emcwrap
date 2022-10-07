@@ -52,6 +52,7 @@ def test_example(create=False, seed=1234):
 
     nchain = ndim*5
     niter = 300
+    niter = 3
 
     initmean = np.zeros(ndim)
     initcov = np.eye(ndim)*np.sqrt(2)
