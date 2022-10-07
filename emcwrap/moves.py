@@ -89,10 +89,10 @@ class DIMEMove(RedBlueMove):
 
         # update AIMH proposal distribution
         newcumlweight = np.logaddexp(self.cumlweight, lweight)
-        self.prop_cov = np.exp(self.cumlweight - newcumlweight) * \
-            self.prop_cov + np.exp(lweight - newcumlweight) * ncov
-        self.prop_mean = np.exp(self.cumlweight - newcumlweight) * \
-            self.prop_mean + np.exp(lweight - newcumlweight) * nmean
+        # self.prop_cov = np.exp(self.cumlweight - newcumlweight) * \
+            # self.prop_cov + np.exp(lweight - newcumlweight) * ncov
+        # self.prop_mean = np.exp(self.cumlweight - newcumlweight) * \
+            # self.prop_mean + np.exp(lweight - newcumlweight) * nmean
         self.cumlweight = newcumlweight
 
         print(self.prop_mean.real)
