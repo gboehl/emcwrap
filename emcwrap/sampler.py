@@ -10,7 +10,7 @@ from grgrlib import map2arr
 from .stats import summary
 
 
-def run_mcmc(lprob, nsteps, p0=None, moves=None, priors=None, prior_transform=None, backend=None, update_freq=False, resume=False, pool=None, report=None, description=None, temp=1, maintenance_interval=False, verbose=False, **kwargs):
+def run_mcmc(lprob, nsteps, p0=None, moves=None, priors=None, prior_transform=None, backend=None, update_freq=False, resume=False, pool=None, report=None, description=None, temp=1, maintenance_interval=False, verbose=True, **kwargs):
     """Run the emcee sampler.
     """
 
@@ -32,11 +32,13 @@ def run_mcmc(lprob, nsteps, p0=None, moves=None, priors=None, prior_transform=No
     if not verbose:  # verbose means VERY verbose
         np.warnings.filterwarnings("ignore")
 
-    if verbose > 2:
+    if verbose > 1:
         report = report or print
-    else:
+    elif verbose:
         pbar = tqdm.tqdm(total=nsteps, unit="sample(s)", dynamic_ncols=True)
         report = report or pbar.write
+    else:
+        report = lambda x: None
 
     old_tau = np.inf
     old_lls = np.array([-np.inf]*nwalks)
@@ -44,7 +46,7 @@ def run_mcmc(lprob, nsteps, p0=None, moves=None, priors=None, prior_transform=No
 
     for result in sampler.sample(p0, iterations=nsteps, **kwargs):
 
-        if not verbose:
+        if verbose == 1:
             lls = list(result)[1]
             maf = 1-sum(lls == old_lls)/nwalks
             try:
@@ -93,7 +95,7 @@ def run_mcmc(lprob, nsteps, p0=None, moves=None, priors=None, prior_transform=No
             sample = sampler.get_chain()
             old_tau = emcee.autocorr.integrated_time(sample, tol=0)
 
-        if not verbose:
+        if verbose == 1:
             pbar.update(1)
 
         # avoid mem leakage
@@ -102,7 +104,8 @@ def run_mcmc(lprob, nsteps, p0=None, moves=None, priors=None, prior_transform=No
 
         cnt += 1
 
-    pbar.close()
+    if verbose == 1:
+        pbar.close()
     if pool:
         pool.close()
 

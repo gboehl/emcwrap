@@ -96,7 +96,6 @@ class DIMEMove(RedBlueMove):
         self.cumlweight = newcumlweight
 
         # update AIMH distribution
-        # there seems to be an issue with using the random state
         dist = ss.multivariate_t(
             self.prop_mean.real, self.prop_cov.real * (self.dft - 2) / self.dft, df=self.dft, allow_singular=True, seed=random.randint(2*31))
 
