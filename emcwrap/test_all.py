@@ -66,7 +66,7 @@ def test_example(create=False):
 
     if create:
         np.save(path, median)
-        print(f'Test file updated at {path}')
+        print(f'Test file updated at {path} with {median}')
     else:
         test_median = np.load(path)
         # gives slightly different estimates depending on architecture
