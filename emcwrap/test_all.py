@@ -10,6 +10,7 @@ from scipy.special import logsumexp
 from emcee.tests.integration.test_proposal import _test_normal, _test_uniform
 
 
+
 filepath = os.path.dirname(__file__)
 
 
