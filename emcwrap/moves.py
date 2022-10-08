@@ -7,6 +7,25 @@ import numpy as np
 import scipy.stats as ss
 
 
+def mvt_sample(df, mean, cov, size, random):
+    """Sample from multivariate t distribution
+
+    For reasons beyond my understanding, the results from random.multivariate_normal with non-identity covariance matrix are not reproducibel across architecture. Since scipy.stats.multivariate_t is based on numpy's multivariate_normal, the workaround is to crochet this manually. Advantage is that the scipy dependency drops out.
+    """
+
+    dim = len(mean)
+
+    # draw samples
+    snorm = random.randn(size,dim)
+    chi2 = random.chisquare(df, size) / df
+
+    # calculate sqrt of covariance
+    svd_cov = np.linalg.svd(cov*(df - 2)/df)
+    sqrt_cov = svd_cov[0]* np.sqrt(svd_cov[1]) @ svd_cov[2]
+
+    return mean + snorm @ sqrt_cov / np.sqrt(chi2)[:,None]
+
+
 class DIMEMove(RedBlueMove):
     r"""A proposal using adaptive differential-independence mixture ensemble MCMC.
 
@@ -69,6 +88,7 @@ class DIMEMove(RedBlueMove):
 
         # calculate distribution stats
         nchain, npar = x.shape
+        # print(x)
 
         # differential evolution: draw the indices of the complementary chains
         i0 = np.arange(nchain) + random.randint(1, nchain, size=nchain)
@@ -95,20 +115,13 @@ class DIMEMove(RedBlueMove):
             self.prop_mean + np.exp(lweight - newcumlweight) * nmean
         self.cumlweight = newcumlweight
 
-        # update AIMH distribution
-        dist = ss.multivariate_t(
-            self.prop_mean.real, self.prop_cov.real * (self.dft - 2) / self.dft, df=self.dft, allow_singular=True, seed=random.randint(2*31))
-
         # draw chains for AIMH sampling
-        rrr = random.rand(nchain) 
-        xchnge = rrr <= self.aimh_prob
-        # xchnge = random.rand(nchain) <= self.aimh_prob
-        # xcand = dist.rvs(sum(xchnge), random_state=random)
-        xcand = dist.rvs(sum(xchnge))
-        # xcand = dist.rvs(sum(xchnge), seed=0)
+        xchnge = random.rand(nchain) <= self.aimh_prob
+
         # draw alternative candidates and calculate their proposal density
-        lprop_old = dist.logpdf(x[xchnge])
-        lprop_new = dist.logpdf(xcand)
+        xcand = mvt_sample(df=self.dft, mean=self.prop_mean, cov=self.prop_cov, size=sum(xchnge), random=random)
+        lprop_old = ss.multivariate_t.logpdf(x[xchnge], self.prop_mean, self.prop_cov* (self.dft - 2) / self.dft, df=self.dft)
+        lprop_new = ss.multivariate_t.logpdf(xcand, self.prop_mean, self.prop_cov* (self.dft - 2) / self.dft, df=self.dft)
 
         # update proposals and factors
         q[xchnge, :] = np.reshape(xcand, (-1, npar))
