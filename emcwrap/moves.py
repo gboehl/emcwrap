@@ -16,14 +16,14 @@ def mvt_sample(df, mean, cov, size, random):
     dim = len(mean)
 
     # draw samples
-    snorm = random.randn(size,dim)
+    snorm = random.randn(size, dim)
     chi2 = random.chisquare(df, size) / df
 
     # calculate sqrt of covariance
-    svd_cov = np.linalg.svd(cov*(df - 2)/df)
-    sqrt_cov = svd_cov[0]* np.sqrt(svd_cov[1]) @ svd_cov[2]
+    svd_cov = np.linalg.svd(cov * (df - 2) / df)
+    sqrt_cov = svd_cov[0] * np.sqrt(svd_cov[1]) @ svd_cov[2]
 
-    return mean + snorm @ sqrt_cov / np.sqrt(chi2)[:,None]
+    return mean + snorm @ sqrt_cov / np.sqrt(chi2)[:, None]
 
 
 class DIMEMove(RedBlueMove):
@@ -44,12 +44,7 @@ class DIMEMove(RedBlueMove):
     """
 
     def __init__(
-        self,
-        sigma=1.0e-5,
-        gamma=None,
-        aimh_prob=0.1,
-        df_proposal_dist=10,
-        **kwargs
+        self, sigma=1.0e-5, gamma=None, aimh_prob=0.1, df_proposal_dist=10, **kwargs
     ):
 
         self.sigma = sigma
@@ -100,8 +95,7 @@ class DIMEMove(RedBlueMove):
         factors = np.zeros(nchain, dtype=np.float64)
 
         # log weight of current ensemble
-        lweight = logsumexp(self.lprobs) + \
-            np.log(sum(self.accepted)) - np.log(nchain)
+        lweight = logsumexp(self.lprobs) + np.log(sum(self.accepted)) - np.log(nchain)
 
         # calculate stats for current ensemble
         ncov = np.cov(x.T, ddof=1)
@@ -109,19 +103,39 @@ class DIMEMove(RedBlueMove):
 
         # update AIMH proposal distribution
         newcumlweight = np.logaddexp(self.cumlweight, lweight)
-        self.prop_cov = np.exp(self.cumlweight - newcumlweight) * \
-            self.prop_cov + np.exp(lweight - newcumlweight) * ncov
-        self.prop_mean = np.exp(self.cumlweight - newcumlweight) * \
-            self.prop_mean + np.exp(lweight - newcumlweight) * nmean
+        self.prop_cov = (
+            np.exp(self.cumlweight - newcumlweight) * self.prop_cov
+            + np.exp(lweight - newcumlweight) * ncov
+        )
+        self.prop_mean = (
+            np.exp(self.cumlweight - newcumlweight) * self.prop_mean
+            + np.exp(lweight - newcumlweight) * nmean
+        )
         self.cumlweight = newcumlweight
 
         # draw chains for AIMH sampling
         xchnge = random.rand(nchain) <= self.aimh_prob
 
         # draw alternative candidates and calculate their proposal density
-        xcand = mvt_sample(df=self.dft, mean=self.prop_mean, cov=self.prop_cov, size=sum(xchnge), random=random)
-        lprop_old = ss.multivariate_t.logpdf(x[xchnge], self.prop_mean, self.prop_cov* (self.dft - 2) / self.dft, df=self.dft)
-        lprop_new = ss.multivariate_t.logpdf(xcand, self.prop_mean, self.prop_cov* (self.dft - 2) / self.dft, df=self.dft)
+        xcand = mvt_sample(
+            df=self.dft,
+            mean=self.prop_mean,
+            cov=self.prop_cov,
+            size=sum(xchnge),
+            random=random,
+        )
+        lprop_old = ss.multivariate_t.logpdf(
+            x[xchnge],
+            self.prop_mean,
+            self.prop_cov * (self.dft - 2) / self.dft,
+            df=self.dft,
+        )
+        lprop_new = ss.multivariate_t.logpdf(
+            xcand,
+            self.prop_mean,
+            self.prop_cov * (self.dft - 2) / self.dft,
+            df=self.dft,
+        )
 
         # update proposals and factors
         q[xchnge, :] = np.reshape(xcand, (-1, npar))
