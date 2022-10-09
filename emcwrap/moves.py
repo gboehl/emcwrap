@@ -39,7 +39,7 @@ class DIMEMove(RedBlueMove):
         mean stretch factor for the proposal vector. By default, it is :math:`2.38 / \sqrt{2\,\mathrm{ndim}}` as recommended by `ter Braak (2006) <http://www.stat.columbia.edu/~gelman/stuff_for_blog/cajo.pdf>`_.
     aimh_prob : float, optional
         probability to draw an adaptive independence Metropolis Hastings (AIMH) proposal. By default this is set to :math:`0.1`.
-    df_proposal_dist : float
+    df_proposal_dist : float, optional
         degrees of freedom of the multivariate t distribution used for AIMH proposals. Defaults to :math:`10`.
     """
 
