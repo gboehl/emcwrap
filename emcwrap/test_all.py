@@ -9,8 +9,6 @@ from scipy.stats import multivariate_normal, norm
 from scipy.special import logsumexp
 from emcee.tests.integration.test_proposal import _test_normal, _test_uniform
 
-
-
 filepath = os.path.dirname(__file__)
 
 
@@ -56,10 +54,12 @@ def test_example(create=False, seed=1234):
 
     initmean = np.zeros(ndim)
     initcov = np.eye(ndim)*np.sqrt(2)
-    initchain = multivariate_normal(mean=initmean, cov=initcov, seed=seed).rvs(nchain)
+    initchain = multivariate_normal(
+        mean=initmean, cov=initcov, seed=seed).rvs(nchain)
 
     moves = DIMEMove(aimh_prob=.1, df_proposal_dist=10)
-    sampler = run_mcmc(log_prob, niter, p0=initchain, moves=moves, verbose=create)
+    sampler = run_mcmc(log_prob, niter, p0=initchain,
+                       moves=moves, verbose=create)
     chain = sampler.get_chain()
 
     path = os.path.join(filepath, "test_storage", "median.npy")

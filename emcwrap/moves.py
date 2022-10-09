@@ -72,7 +72,7 @@ class DIMEMove(RedBlueMove):
             self.cumlweight = -np.inf
 
     def propose(self, model, state):
-        # wrap original propose to get the boolean array of accepted proposals
+        # wrap original propose to get the some info on the current state
         self.lprobs = state.log_prob
         state, accepted = super(DIMEMove, self).propose(model, state)
         self.accepted = accepted
@@ -81,9 +81,7 @@ class DIMEMove(RedBlueMove):
     def get_proposal(self, x, dummy, random):
         # actual proposal function
 
-        # calculate distribution stats
         nchain, npar = x.shape
-        # print(x)
 
         # differential evolution: draw the indices of the complementary chains
         i0 = np.arange(nchain) + random.randint(1, nchain, size=nchain)
@@ -95,7 +93,8 @@ class DIMEMove(RedBlueMove):
         factors = np.zeros(nchain, dtype=np.float64)
 
         # log weight of current ensemble
-        lweight = logsumexp(self.lprobs) + np.log(sum(self.accepted)) - np.log(nchain)
+        lweight = logsumexp(self.lprobs) + \
+            np.log(sum(self.accepted)) - np.log(nchain)
 
         # calculate stats for current ensemble
         ncov = np.cov(x.T, ddof=1)
