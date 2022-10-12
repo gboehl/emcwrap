@@ -182,11 +182,15 @@ def get_prior_sample(frozen_prior, nsamples, check_func=False, seed=None, mapper
                     else:
                         done = True
 
+                    # let non-finite count as errors
+                    if not done:
+                        raise ValueError("result not finite")
+
                 # be kind to errors
                 except Exception as e:
                     if debug:
                         print(str(e) + f" ({no})")
-                    if not locseed and no == max_attempts:
+                    if no >= max_attempts:
                         raise type(e)(
                             str(e) + f" (after {no} unsuccessful attemps).").with_traceback(sys.exc_info()[2])
                     else:
