@@ -78,19 +78,9 @@ class DIMEMove(RedBlueMove):
         self.accepted = accepted
         return state, accepted
 
-    def get_proposal(self, x, dummy, random):
-        # actual proposal function
+    def update_proposal_dist(self, x):
 
         nchain, npar = x.shape
-
-        # differential evolution: draw the indices of the complementary chains
-        i0 = np.arange(nchain) + random.randint(1, nchain, size=nchain)
-        i1 = np.arange(nchain) + random.randint(1, nchain - 1, size=nchain)
-        i1[i1 >= i0] += 1
-        # add small noise and calculate proposal
-        f = self.sigma * random.randn(nchain)
-        q = x + self.g0 * (x[i0 % nchain] - x[i1 % nchain]) + f[:, np.newaxis]
-        factors = np.zeros(nchain, dtype=np.float64)
 
         # log weight of current ensemble
         lweight = logsumexp(self.lprobs) + \
@@ -111,6 +101,23 @@ class DIMEMove(RedBlueMove):
             + np.exp(lweight - newcumlweight) * nmean
         )
         self.cumlweight = newcumlweight
+
+    def get_proposal(self, x, dummy, random):
+        # actual proposal function
+
+        nchain, npar = x.shape
+
+        # differential evolution: draw the indices of the complementary chains
+        i0 = np.arange(nchain) + random.randint(1, nchain, size=nchain)
+        i1 = np.arange(nchain) + random.randint(1, nchain - 1, size=nchain)
+        i1[i1 >= i0] += 1
+        # add small noise and calculate proposal
+        f = self.sigma * random.randn(nchain)
+        q = x + self.g0 * (x[i0 % nchain] - x[i1 % nchain]) + f[:, np.newaxis]
+        factors = np.zeros(nchain, dtype=np.float64)
+
+        # update AIMH proposal distribution
+        self.update_proposal_dist(x)
 
         # draw chains for AIMH sampling
         xchnge = random.rand(nchain) <= self.aimh_prob
