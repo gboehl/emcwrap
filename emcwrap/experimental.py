@@ -4,7 +4,7 @@ from emcee.moves.red_blue import RedBlueMove
 from emcee.moves.de import DEMove
 from scipy.special import logsumexp
 import numpy as np
-import scipy.stats as ss
+from scipy.stats import multivariate_t
 
 
 def mvt_sample(df, mean, cov, size, random):
@@ -26,10 +26,10 @@ def mvt_sample(df, mean, cov, size, random):
     return mean + snorm @ sqrt_cov / np.sqrt(chi2)[:, None]
 
 
-class DIMEMove(RedBlueMove):
+class DIMEXMove(RedBlueMove):
     r"""A proposal using adaptive differential-independence mixture ensemble MCMC.
 
-    This is the `Differential-Independence Mixture Ensemble proposal` as developed in `Ensemble MCMC Sampling for DSGE Models <https://gregorboehl.com/live/dime_mcmc_boehl.pdf>`_.
+    This is the `Differential-Independence Mixture Ensemble proposal` as developed in `Ensemble MCMC Sampling for DSGE Models <https://gregorboehl.com/live/dime_mcmc_boehl.pdf>`_, but with using a snooker update as in `Ter Braak & Vrugt (2008) <http://link.springer.com/article/10.1007/s11222-008-9104-9>`_.
 
     Parameters
     ----------
@@ -53,7 +53,7 @@ class DIMEMove(RedBlueMove):
         self.dft = df_proposal_dist
 
         kwargs["nsplits"] = 1
-        super(DIMEMove, self).__init__(**kwargs)
+        super(DIMEXMove, self).__init__(**kwargs)
 
     def setup(self, coords):
         # set some sane defaults
@@ -74,7 +74,7 @@ class DIMEMove(RedBlueMove):
     def propose(self, model, state):
         # wrap original propose to get the some info on the current state
         self.lprobs = state.log_prob
-        state, accepted = super(DIMEMove, self).propose(model, state)
+        state, accepted = super(DIMEXMove, self).propose(model, state)
         self.accepted = accepted
         return state, accepted
 
@@ -113,11 +113,24 @@ class DIMEMove(RedBlueMove):
         # differential evolution: draw the indices of the complementary chains
         i0 = np.arange(nchain) + random.randint(1, nchain, size=nchain)
         i1 = np.arange(nchain) + random.randint(1, nchain - 1, size=nchain)
+        i2 = np.arange(nchain) + random.randint(1, nchain - 2, size=nchain)
         i1 += i1 >= i0
-        # add small noise and calculate proposal
-        f = self.sigma * random.randn(nchain)
-        q = x + self.g0 * (x[i0 % nchain] - x[i1 % nchain]) + f[:, None]
-        factors = np.zeros(nchain, dtype=np.float64)
+        i2 += (i2 >= i0) + (i2 >= i1)
+
+        z0 = x[i0 % nchain]
+        z1 = x[i1 % nchain]
+        z2 = x[i2 % nchain]
+
+        # calculate proposal
+        delta = x - z0
+        norm = np.linalg.norm(delta, axis=1)
+        u = delta / np.sqrt(norm)[:, None]
+        q = x + u*self.g0 * (np.sum(u*z1, axis=1) -
+                             np.sum(u*z2, axis=1))[:, None]
+
+        # calculate weights
+        metropolis = np.log(np.linalg.norm(q - z0, axis=1)) - np.log(norm)
+        factors = 0.5 * (npar - 1) * metropolis
 
         # draw chains for AIMH sampling
         xchnge = random.rand(nchain) <= self.aimh_prob
@@ -130,13 +143,13 @@ class DIMEMove(RedBlueMove):
             size=sum(xchnge),
             random=random,
         )
-        lprop_old = ss.multivariate_t.logpdf(
+        lprop_old = multivariate_t.logpdf(
             x[xchnge],
             self.prop_mean,
             self.prop_cov * (self.dft - 2) / self.dft,
             df=self.dft,
         )
-        lprop_new = ss.multivariate_t.logpdf(
+        lprop_new = multivariate_t.logpdf(
             xcand,
             self.prop_mean,
             self.prop_cov * (self.dft - 2) / self.dft,
