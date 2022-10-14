@@ -72,13 +72,17 @@ class DIMEMove(RedBlueMove):
             self.cumlweight = -np.inf
 
     def propose(self, model, state):
-        # wrap original propose to get the some info on the current state
+        """Wrap original propose to get the some info on the current state
+        """
+
         self.lprobs = state.log_prob
         state, accepted = super(DIMEMove, self).propose(model, state)
         self.accepted = accepted
         return state, accepted
 
     def update_proposal_dist(self, x):
+        """Update proposal distribution with ensemble `x`
+        """
 
         nchain, npar = x.shape
 
@@ -103,7 +107,8 @@ class DIMEMove(RedBlueMove):
         self.cumlweight = newcumlweight
 
     def get_proposal(self, x, dummy, random):
-        # actual proposal function
+        """Actual proposal function
+        """
 
         nchain, npar = x.shape
 
@@ -130,14 +135,8 @@ class DIMEMove(RedBlueMove):
             size=sum(xchnge),
             random=random,
         )
-        lprop_old = ss.multivariate_t.logpdf(
-            x[xchnge],
-            self.prop_mean,
-            self.prop_cov * (self.dft - 2) / self.dft,
-            df=self.dft,
-        )
-        lprop_new = ss.multivariate_t.logpdf(
-            xcand,
+        lpropd = ss.multivariate_t.logpdf(
+            np.vstack((x[None, xchnge], xcand[None])),
             self.prop_mean,
             self.prop_cov * (self.dft - 2) / self.dft,
             df=self.dft,
@@ -145,6 +144,6 @@ class DIMEMove(RedBlueMove):
 
         # update proposals and factors
         q[xchnge, :] = np.reshape(xcand, (-1, npar))
-        factors[xchnge] = lprop_old - lprop_new
+        factors[xchnge] = lpropd[0] - lpropd[1]
 
         return q, factors
