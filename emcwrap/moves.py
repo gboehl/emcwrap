@@ -4,7 +4,7 @@ from emcee.moves.red_blue import RedBlueMove
 from emcee.moves.de import DEMove
 from scipy.special import logsumexp
 import numpy as np
-import scipy.stats as ss
+from scipy.stats import multivariate_t
 
 
 def mvt_sample(df, mean, cov, size, random):
@@ -135,7 +135,7 @@ class DIMEMove(RedBlueMove):
             size=sum(xchnge),
             random=random,
         )
-        lprop_old, lprop_new = ss.multivariate_t.logpdf(
+        lprop_old, lprop_new = multivariate_t.logpdf(
             np.vstack((x[None, xchnge], xcand[None])),
             self.prop_mean,
             self.prop_cov * (self.dft - 2) / self.dft,
