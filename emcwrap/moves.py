@@ -147,3 +147,57 @@ class DIMEMove(RedBlueMove):
         factors[xchnge] = lpropd[0] - lpropd[1]
 
         return q, factors
+
+
+class IMHMove(RedBlueMove):
+    r"""A proposal using independence MCMC.
+
+    This is a standard independence MCMC move.
+
+    Parameters
+    ----------
+    mean : array
+        mean the proposal multivariate t distribution. Defaults to :math:`10`.
+    cov : array
+        covariance of the proposal multivariate t distribution. Defaults to :math:`10`.
+    df_proposal_dist : float, optional
+        degrees of freedom of the multivariate t distribution. Defaults to :math:`10`.
+    """
+
+    def __init__(
+        self, mean, cov, df_proposal_dist=10, **kwargs
+    ):
+
+        self.prop_mean = mean
+        self.prop_cov = cov
+        self.dft = df_proposal_dist
+
+        kwargs["nsplits"] = 1
+        super(IMHMove, self).__init__(**kwargs)
+
+    def get_proposal(self, x, dummy, random):
+        """Actual proposal function
+        """
+
+        nchain, npar = x.shape
+
+        # draw alternative candidates and calculate their proposal density
+        xcand = mvt_sample(
+            df=self.dft,
+            mean=self.prop_mean,
+            cov=self.prop_cov,
+            size=nchain,
+            random=random,
+        )
+        lpropd = multivariate_t.logpdf(
+            np.vstack((x[None], xcand[None])),
+            self.prop_mean,
+            self.prop_cov * (self.dft - 2) / self.dft,
+            df=self.dft,
+        )
+
+        # update proposals and factors
+        q = np.reshape(xcand, (-1, npar))
+        factors = lpropd[0] - lpropd[1]
+
+        return q, factors

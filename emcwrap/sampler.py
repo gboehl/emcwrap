@@ -10,7 +10,7 @@ from grgrlib import map2arr
 from .stats import summary
 
 
-def run_mcmc(lprob, nsteps, p0=None, moves=None, priors=None, prior_transform=None, backend=None, update_freq=False, resume=False, pool=None, report=None, description=None, temp=1, maintenance_interval=False, verbose=True, **kwargs):
+def run_mcmc(lprob, nsteps=None, p0=None, moves=None, stopping_weight=None, priors=None, prior_transform=None, backend=None, update_freq=False, resume=False, pool=None, report=None, description=None, temp=1, maintenance_interval=False, verbose=True, **kwargs):
     """Run the emcee sampler.
     """
 
@@ -38,13 +38,23 @@ def run_mcmc(lprob, nsteps, p0=None, moves=None, priors=None, prior_transform=No
         pbar = tqdm.tqdm(total=nsteps, unit="sample(s)", dynamic_ncols=True)
         report = report or pbar.write
     else:
-        report = lambda x: None
+        def report(x): return None
 
     old_tau = np.inf
     old_lls = np.array([-np.inf]*nwalks)
+    cumlweight = -np.inf
     cnt = 0
 
     for result in sampler.sample(p0, iterations=nsteps, **kwargs):
+
+        if stopping_weight is not None:
+            state_weight = cumlweight - moves.cumlweight
+            if state_weight > np.log(1 - stopping_weight):
+                if verbose:
+                    print(
+                        f"(mcmc:) desired incremental weight of {stopping_weight:.1e} reached. Exiting...")
+                break
+            cumlweight = moves.cumlweight
 
         if verbose == 1:
             lls = list(result)[1]
@@ -53,9 +63,12 @@ def run_mcmc(lprob, nsteps, p0=None, moves=None, priors=None, prior_transform=No
                 maf = f"{maf:3.0%}"
             except BlockingIOError:
                 maf = "??"
-            pbar.set_description(
-                f"[ll/MAF:{np.max(lls):7.3f}({np.std(lls):1.0e})/{maf}]"
-            )
+            desc_str = f"[ll/MAF:{np.max(lls):7.3f}({np.std(lls):1.0e})/{maf}"
+            if stopping_weight is not None:
+                desc_str += f" | {state_weight:.2e}"
+            desc_str += "]"
+
+            pbar.set_description(desc_str)
             old_lls = lls.copy()
 
         if cnt and update_freq and not cnt % update_freq:
