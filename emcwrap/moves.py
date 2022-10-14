@@ -135,7 +135,7 @@ class DIMEMove(RedBlueMove):
             size=sum(xchnge),
             random=random,
         )
-        lpropd = ss.multivariate_t.logpdf(
+        lprop_old, lprop_new = ss.multivariate_t.logpdf(
             np.vstack((x[None, xchnge], xcand[None])),
             self.prop_mean,
             self.prop_cov * (self.dft - 2) / self.dft,
@@ -144,7 +144,7 @@ class DIMEMove(RedBlueMove):
 
         # update proposals and factors
         q[xchnge, :] = np.reshape(xcand, (-1, npar))
-        factors[xchnge] = lpropd[0] - lpropd[1]
+        factors[xchnge] = lprop_old - lprop_new
 
         return q, factors
 
@@ -189,7 +189,7 @@ class IMHMove(RedBlueMove):
             size=nchain,
             random=random,
         )
-        lpropd = multivariate_t.logpdf(
+        lprop_old, lprop_new = multivariate_t.logpdf(
             np.vstack((x[None], xcand[None])),
             self.prop_mean,
             self.prop_cov * (self.dft - 2) / self.dft,
@@ -198,6 +198,6 @@ class IMHMove(RedBlueMove):
 
         # update proposals and factors
         q = np.reshape(xcand, (-1, npar))
-        factors = lpropd[0] - lpropd[1]
+        factors = lprop_old - lprop_new
 
         return q, factors
