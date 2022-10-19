@@ -6,9 +6,20 @@ import emcee
 import numpy as np
 import scipy.stats as ss
 import scipy.optimize as so
-from grgrlib import parse_yaml
 from scipy.special import logit, expit
 from .dists import inv_gamma_spec, InvGammaDynare
+
+
+def parse_yaml(mfile):
+    """parse from yaml file"""
+    import yaml
+
+    f = open(mfile)
+    mtxt = f.read()
+    f.close()
+
+    # get dict
+    return yaml.safe_load(mtxt)
 
 
 def get_prior(prior, verbose=False):
@@ -17,7 +28,7 @@ def get_prior(prior, verbose=False):
 
     prior_lst = ()
     initv, lb, ub = [], [], []
-    funcs_con, funcs_re = (), () # prior-to-sampler, sampler-to-prior
+    funcs_con, funcs_re = (), ()  # prior-to-sampler, sampler-to-prior
 
     snorm = ss.norm()
 
@@ -133,7 +144,8 @@ def get_bijective_prior_transformation(funcs_con, funcs_re):
         res = x.copy()
 
         for i in range(x.shape[-1]):
-            res[...,i] = funcs_con[i](x[...,i]) if sampler_to_prior else funcs_re[i](x[...,i])
+            res[..., i] = funcs_con[i](
+                x[..., i]) if sampler_to_prior else funcs_re[i](x[..., i])
 
         return res
 
@@ -202,6 +214,38 @@ def remove_backend(backend):
     """just a shortcut"""
     os.remove(backend)
     return
+
+
+def map2arr(iterator):
+    """Function to cast result from `map` to a tuple of stacked results
+
+    By default, this returns numpy arrays. Automatically checks if the map object is a tuple, and if not, just one object is returned (instead of a tuple). Be warned, this does not work if the result of interest of the mapped function is a single tuple.
+
+    Parameters
+    ----------
+    iterator : iter
+        the iterator returning from `map`
+
+    Returns
+    -------
+    numpy array (optional: list)
+    """
+
+    res = ()
+    mode = 0
+
+    for obj in iterator:
+
+        if not mode:
+            for entry in obj:
+                res = res + ([entry],)
+            mode = 1
+
+        else:
+            for no, entry in enumerate(obj):
+                res[no].append(entry)
+
+    return tuple(np.array(tupo) for tupo in res)
 
 
 rm_backend = remove_backend

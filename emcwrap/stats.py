@@ -10,8 +10,8 @@ import scipy.stats as ss
 try:
     from grgrlib.njitted import mvn_logpdf as logpdf
 except ModuleNotFoundError:
-    def logpdf(drv, cmean, ccov): return ss.multivariate_normal(
-        mean=cmean, cov=ccov).logpdf(drv)
+    def logpdf(drv, cmean, ccov):
+        return ss.multivariate_normal(mean=cmean, cov=ccov).logpdf(drv)
 
 
 def mdd_laplace(chain, lprobs, calc_hess=False):

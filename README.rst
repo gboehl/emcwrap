@@ -64,7 +64,6 @@ Lets look at an example. Let's define a nice and challenging distribution:
     import numpy as np
     import scipy.stats as ss
     from emcwrap.test_all import _create_test_func, _marginal_pdf_test_func
-    from grgrlib import figurator
 
     # make it reproducible
     np.random.seed(0)
@@ -117,9 +116,11 @@ Note that if you wish to use emcee directly instead of the wrapper, you could si
     sampler = emcee.EnsembleSampler(nchain, ndim, log_prob, moves=moves)
     sampler.run_mcmc(initchain, int(niter), progress=True)
 
-Lets plot the marginal distribution along the first dimension (remember that this actually is a 35-dimensional distribution).
+Lets plot the marginal distribution along the first dimension (remember that this actually is a 35-dimensional distribution). For plotting, this tutorial assumes ``grgrlib`` to be installed (just run ``pip install grgrlib``).
 
 .. code-block:: python
+
+    from grgrlib import figurator
 
     # get elements
     chain = sampler.get_chain()

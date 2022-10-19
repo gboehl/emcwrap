@@ -31,6 +31,5 @@ setup(
         "emcee",
         "pandas",
         "matplotlib",
-        "grgrlib>=0.1.15",
     ],
 )

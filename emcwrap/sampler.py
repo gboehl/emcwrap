@@ -6,7 +6,7 @@ import sys
 import tqdm
 import emcee
 import numpy as np
-from grgrlib import map2arr
+from .tools import map2arr
 from .stats import summary
 
 
