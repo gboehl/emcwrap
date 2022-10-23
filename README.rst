@@ -120,7 +120,7 @@ Note that if you wish to use emcee directly instead of the wrapper, you could si
     sampler.run_mcmc(initchain, int(niter), progress=True)
 
 
-The following code creates the figure above, which is a plot of the marginal distribution along the first dimension (remember that this actually is a 35-dimensional distribution). For plotting, this tutorial assumes ``grgrlib`` to be installed (just run ``pip install grgrlib``).
+The following code creates the figure above, which is a plot of the marginal distribution along the first dimension (remember that this actually is a 35-dimensional distribution). For plotting, this tutorial assumes ``grgrlib`` to be installed (just run ``pip install grgrlib`` in terminal/prompt).
 
 .. code-block:: python
 
