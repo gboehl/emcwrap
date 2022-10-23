@@ -58,7 +58,7 @@ The provided tools for Bayesian analysis are ready-to-use, but largely undocumen
 Tutorial
 --------
 
-Lets look at an example. Let's define a nice and challenging distribution:
+Lets look at an example. Let's define a nice and challenging distribution (it's the distribution from the figure above):
 
 .. code-block:: python
 
