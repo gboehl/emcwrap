@@ -64,8 +64,7 @@ def run_mcmc(lprob, nsteps=None, p0=None, moves=None, stopping_weight=None, prio
             except BlockingIOError:
                 maf = "??"
             desc_str = f"[ll/MAF:{np.max(lls):7.3f}({np.std(lls):1.0e})/{maf}"
-            if stopping_weight is not None:
-                desc_str += f" | {state_weight:.2e}"
+            desc_str += f" | {state_weight:1.0e}"
             desc_str += "]"
 
             pbar.set_description(desc_str)
