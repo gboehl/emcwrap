@@ -3,26 +3,29 @@ emcwrap
 
 **Collection of tools for Bayesian inference using DIME MCMC sampling**
 
-This provides the Differential-Independence Mixture Ensemble (DIME) MCMC sampler together with a nice set of statistical tools for Bayesian analysis. DIME MCMC is developed in `Ensemble MCMC Sampling for DSGE Models <https://gregorboehl.com/live/dime_mcmc_boehl.pdf>`_. *(Gregor Boehl, 2022, CRC 224 discussion paper series)*.
+This provides the Differential-Independence Mixture Ensemble (DIME) MCMC sampler together with a nice set of statistical tools for Bayesian analysis. DIME MCMC is developed in `Ensemble MCMC Sampling for DSGE Models <https://gregorboehl.com/live/dime_mcmc_boehl.pdf>`_. *(Gregor Boehl, 2022, SSRN No. 4250395)*.
 
 The sampler has a series of advantages over conventional samplers:
-
 
 #. DIME MCMC is a (very fast) gradient-free **global multi-start optimizer** and, at the same time, a **MCMC sampler** that converges to the posterior distribution. This makes any posterior mode density maximization prior to MCMC sampling superfluous.
 #. The DIME sampler is pretty robust for odd shaped, **multimodal distributions**.
 #. DIME MCMC is **parallelizable**: many chains can run in parallel, and the necessary number of draws decreases almost one-to-one with the number of chains.
 #. DIME proposals are generated from an **endogenous and adaptive proposal distribution**, thereby providing close-to-optimal proposal distributions for black box target distributions without the need for manual fine-tuning.
 
+.. image:: https://github.com/gboehl/emcwrap/blob/main/docs/dist.png?raw=true
+  :width: 800
+  :alt: Sample and target distribution
+
 Installation
 ------------
 
-Installing the `repository version <https://pypi.org/project/econpizza/>`_ from PyPi is as simple as:
+Installing the `repository version <https://pypi.org/project/econpizza/>`_ from PyPi is as simple as typing
 
 .. code-block:: bash
 
    pip install emcwrap
 
-There exists complementary stand-alone implementations in `Julia language <https://github.com/gboehl/DIMESampler.jl>`_ and `in matlab <https://github.com/gboehl/dime-mcmc-matlab>`_.
+in your terminal or Anaconda Prompt. There exists complementary stand-alone implementations in `Julia language <https://github.com/gboehl/DIMESampler.jl>`_ and `in matlab <https://github.com/gboehl/dime-mcmc-matlab>`_.
 
 
 Usage
@@ -116,7 +119,8 @@ Note that if you wish to use emcee directly instead of the wrapper, you could si
     sampler = emcee.EnsembleSampler(nchain, ndim, log_prob, moves=moves)
     sampler.run_mcmc(initchain, int(niter), progress=True)
 
-Lets plot the marginal distribution along the first dimension (remember that this actually is a 35-dimensional distribution). For plotting, this tutorial assumes ``grgrlib`` to be installed (just run ``pip install grgrlib``).
+
+The following code creates the figure above, which is a plot of the marginal distribution along the first dimension (remember that this actually is a 35-dimensional distribution). For plotting, this tutorial assumes ``grgrlib`` to be installed (just run ``pip install grgrlib``).
 
 .. code-block:: python
 
@@ -135,11 +139,6 @@ Lets plot the marginal distribution along the first dimension (remember that thi
     axs[0].plot(x, ss.t(df=10, loc=moves.prop_mean[0], scale=moves.prop_cov[0, 0] ** 0.5).pdf(x), ":", label="Final proposals")
     axs[0].plot(x, _marginal_pdf_test_func(x, cov_scale, m, weight), label="Target")
     axs[0].legend()
-
-
-.. image:: https://github.com/gboehl/emcwrap/blob/main/docs/dist.png?raw=true
-  :width: 800
-  :alt: Sample and target distribution
 
 To ensure proper mixing, let us also have a look at the MCMC traces, again focussing on the first dimension.
 
@@ -174,8 +173,8 @@ If you are using this software in your research, please cite
 .. code-block::
 
     @techreport{boehl2022mcmc,
-    title         = {Ensemble MCMC Sampling for DSGE Models},
-    author        = {Boehl, Gregor},
-    year          = 2022,
-    institution   = {CRC224 discussion paper series}
+    author={Gregor Boehl},
+    title={Ensemble MCMC Sampling for DSGE Models},
+    journal={Available at SSRN 4250395},
+    year={2022}
     }
