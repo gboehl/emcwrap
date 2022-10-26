@@ -8,6 +8,7 @@ import emcee
 import numpy as np
 from .tools import map2arr
 from .stats import summary
+from .moves import DIMEMove
 
 
 def run_mcmc(lprob, nsteps=None, p0=None, moves=None, stopping_weight=None, priors=None, prior_transform=None, backend=None, update_freq=False, resume=False, pool=None, report=None, description=None, temp=1, maintenance_interval=False, verbose=True, **kwargs):
@@ -16,6 +17,9 @@ def run_mcmc(lprob, nsteps=None, p0=None, moves=None, stopping_weight=None, prio
 
     if prior_transform is None:
         def prior_transform(x): return x
+
+    if moves is None:
+        moves = DIMEMove()
 
     if isinstance(backend, str):
         backend = emcee.backends.HDFBackend(
