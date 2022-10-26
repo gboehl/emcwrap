@@ -47,14 +47,14 @@ def run_mcmc(lprob, nsteps=None, p0=None, moves=None, stopping_weight=None, prio
 
     for result in sampler.sample(p0, iterations=nsteps, **kwargs):
 
+        state_weight = cumlweight - moves.cumlweight
+        cumlweight = moves.cumlweight
         if stopping_weight is not None:
-            state_weight = cumlweight - moves.cumlweight
             if state_weight > np.log(1 - stopping_weight):
                 if verbose:
                     print(
                         f"(mcmc:) desired incremental weight of {stopping_weight:.1e} reached. Exiting...")
                 break
-            cumlweight = moves.cumlweight
 
         if verbose == 1:
             lls = list(result)[1]
