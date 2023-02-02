@@ -6,6 +6,7 @@ import sys
 import tqdm
 import emcee
 import numpy as np
+import warnings
 from .tools import map2arr
 from .stats import summary
 from .moves import DIMEMove
@@ -34,7 +35,7 @@ def run_mcmc(lprob, nsteps=None, p0=None, moves=None, stopping_weight=None, prio
         nwalks, ndim, lprob, moves=moves, pool=pool, backend=backend)
 
     if not verbose:  # verbose means VERY verbose
-        np.warnings.filterwarnings("ignore")
+        warnings.filterwarnings("ignore")
 
     if verbose > 1:
         report = report or print
@@ -129,7 +130,7 @@ def run_mcmc(lprob, nsteps=None, p0=None, moves=None, stopping_weight=None, prio
         pool.close()
 
     if not verbose:
-        np.warnings.filterwarnings("default")
+        warnings.filterwarnings("default")
 
     if backend is None:
         return sampler
@@ -183,10 +184,10 @@ def get_prior_sample(frozen_prior, nsamples, check_func=False, seed=None, mapper
 
             no += 1
 
-            with np.warnings.catch_warnings(record=False):
+            with warnings.catch_warnings(record=False):
                 try:
                     # set warnings
-                    np.warnings.filterwarnings(filterwarnings)
+                    warnings.filterwarnings(filterwarnings)
                     rst = np.random.randint(2 ** 31)  # win explodes with 2**32
                     # draw from prior
                     pdraw = [
