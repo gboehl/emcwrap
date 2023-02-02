@@ -5,8 +5,8 @@ import os
 import sys
 import tqdm
 import emcee
-import numpy as np
 import warnings
+import numpy as np
 from .tools import map2arr
 from .stats import summary
 from .moves import DIMEMove

@@ -7,4 +7,4 @@ from .stats import *
 from .plots import *
 from .moves import *
 
-__version__ = '0.2.3'
+__version__ = '0.2.4'
