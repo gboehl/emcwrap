@@ -5,9 +5,11 @@ name: CI Workflow
 
 on:
   push:
-    branches: [main]
+    branches: [master]
   pull_request:
-    branches: [main]
+    branches: [master]
+  schedule:
+    - cron: '30 5 * * 1'
 
 jobs:
   build:
