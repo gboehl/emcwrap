@@ -152,36 +152,6 @@ def get_bijective_prior_transformation(funcs_con, funcs_re):
     return bijective_prior_transformation
 
 
-def find_mode_simple(lprob, init, frozen_prior, sd=True, verbose=False, **kwargs):
-
-    def objective(x):
-
-        ll = -lprob(x) - log_prior(x, frozen_prior)
-
-        if verbose:
-            print(-ll)
-
-        return ll
-
-    if not 'method' in kwargs:
-        kwargs['method'] = 'Nelder-Mead'
-
-    # minimize objective
-    result = so.minimize(objective, init, **kwargs)
-
-    # Compute standard deviation if required
-    if sd:
-        H, nfev_total = hessian(objective, result.x,
-                                nfev=result.nfev, f_x0=result.fun)
-        Hinv = np.linalg.inv(H)
-        x_sd = np.sqrt(np.diagonal(Hinv))
-    else:
-        nfev_total = result.nfev
-        x_sd = np.zeros_like(result.x)
-
-    return result, x_sd, nfev_total
-
-
 def save_to_backend(backend, content):
 
     with backend.open("a") as f:
