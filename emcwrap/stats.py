@@ -198,7 +198,7 @@ def summary(priors, store, pmode=None, bounds=None, alpha=0.1, top=None, show_pr
     for i, var in enumerate(priors):
 
         lst = []
-        if show_prior:
+        if show_prior and isinstance(priors, dict):
             prior = priors[var]
             if len(prior) > 3:
                 prior = prior[-3:]

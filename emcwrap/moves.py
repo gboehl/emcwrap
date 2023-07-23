@@ -87,8 +87,11 @@ class DIMEMove(RedBlueMove):
         nchain, npar = x.shape
 
         # log weight of current ensemble
-        lweight = logsumexp(self.lprobs) + \
-            np.log(sum(self.accepted)) - np.log(nchain)
+        if self.accepted.any():
+            lweight = logsumexp(self.lprobs) + \
+                np.log(sum(self.accepted)) - np.log(nchain)
+        else:
+            lweight = -np.inf
 
         # calculate stats for current ensemble
         ncov = np.cov(x.T, ddof=1)
