@@ -12,6 +12,7 @@ class InvGammaDynare(ss.rv_continuous):
 
     # @np.vectorize
     def _logpdf(self, x, s, nu):
+        return_float = all(isinstance(e, (float, int)) for e in (x, s, nu))
 
         x = np.atleast_1d(x)
         s = np.atleast_1d(s)
@@ -27,6 +28,8 @@ class InvGammaDynare(ss.rv_continuous):
             - 0.5 * s[x >= 0] / np.square(x[x >= 0])
         )
 
+        if return_float:
+            return lpdf[0]
         return lpdf
 
     def _pdf(self, x, s, nu):
