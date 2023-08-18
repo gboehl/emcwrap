@@ -9,7 +9,7 @@ import warnings
 import numpy as np
 from .tools import map2arr
 from .stats import summary
-from .moves import DIMEMove
+from dime_sampler import DIMEMove
 
 
 def run_mcmc(lprob, nsteps=None, p0=None, moves=None, stopping_weight=None, priors=None, prior_transform=None, backend=None, update_freq=False, resume=False, pool=None, report=None, description=None, temp=1, maintenance_interval=False, verbose=True, **kwargs):

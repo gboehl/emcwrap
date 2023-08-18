@@ -3,7 +3,9 @@ emcwrap
 
 **Collection of tools for Bayesian inference using DIME MCMC sampling**
 
-This provides the Differential-Independence Mixture Ensemble (DIME) MCMC sampler together with a nice set of statistical tools for Bayesian analysis. DIME MCMC is developed in `An Ensemble MCMC Sampler for Robust Bayesian Inference <https://gregorboehl.com/live/dime_mcmc_boehl.pdf>`_. *(Gregor Boehl, 2022, SSRN No. 4250395)*.
+This provides a series of tools around the Differential-Independence Mixture Ensemble (DIME) MCMC sampler together with a nice set of statistical tools for Bayesian analysis. DIME MCMC is developed in `An Ensemble MCMC Sampler for Robust Bayesian Inference <https://gregorboehl.com/live/dime_mcmc_boehl.pdf>`_. *(Gregor Boehl, 2022, SSRN No. 4250395)*.
+
+There exists a stand-alone implementations of the sampler in the ``dime_sampler`` `package <https://github.com/gboehl/dime_sampler>`_.
 
 The sampler has a series of advantages over conventional samplers:
 
@@ -11,11 +13,11 @@ The sampler has a series of advantages over conventional samplers:
 #. The DIME sampler is pretty robust for odd shaped, **multimodal distributions**.
 #. DIME MCMC is **parallelizable**: many chains can run in parallel, and the necessary number of draws decreases almost one-to-one with the number of chains.
 #. DIME proposals are generated from an **endogenous and adaptive proposal distribution**, thereby providing close-to-optimal proposal distributions for black box target distributions without the need for manual fine-tuning.
-    
+
 .. figure:: https://github.com/gboehl/emcwrap/blob/main/docs/dist.png?raw=true
   :width: 800
   :alt: Sample and target distribution
-  
+
   Figure: A trimodal example distribution in 35 dimensions
 
 Installation
@@ -27,7 +29,7 @@ Installing the `repository version <https://pypi.org/project/econpizza/>`_ from 
 
    pip install emcwrap
 
-in your terminal or Anaconda Prompt. There exists complementary stand-alone implementations in `Julia language <https://github.com/gboehl/DIMESampler.jl>`_ and `in matlab <https://github.com/gboehl/dime-mcmc-matlab>`_.
+in your terminal or Anaconda Prompt.
 
 
 Usage
@@ -38,7 +40,7 @@ The proposal can be used directly as a drop-in replacement for `emcee <https://g
 .. code-block:: python
 
     import emcee
-    from emcwrap import DIMEMove
+    from dime_sampler import DIMEMove
 
     move = DIMEMove()
 

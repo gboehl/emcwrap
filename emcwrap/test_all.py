@@ -3,7 +3,7 @@
 
 import os
 import numpy as np
-from .moves import DIMEMove
+from dime_sampler import DIMEMove
 from .sampler import run_mcmc
 from scipy.stats import multivariate_normal, norm
 from scipy.special import logsumexp

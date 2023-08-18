@@ -1,3 +1,4 @@
+dime_sampler
 numpy
 scipy
 tqdm
