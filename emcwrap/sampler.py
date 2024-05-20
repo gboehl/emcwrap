@@ -12,7 +12,7 @@ from .stats import summary
 from dime_sampler import DIMEMove
 
 
-def run_mcmc(lprob, nsteps=None, p0=None, moves=None, stopping_weight=None, priors=None, prior_transform=None, backend=None, update_freq=False, resume=False, pool=None, report=None, description=None, temp=1, maintenance_interval=False, verbose=True, seed=None, **kwargs):
+def run_mcmc(lprob, nsteps=None, p0=None, moves=None, stopping_weight=None, priors=None, prior_transform=None, backend=None, update_freq=False, resume=False, pool=None, report=None, description=None, temp=1, maintenance_interval=False, verbose=True, **kwargs):
     """Run the emcee sampler.
     """
 
@@ -32,7 +32,7 @@ def run_mcmc(lprob, nsteps=None, p0=None, moves=None, stopping_weight=None, prio
     nwalks, ndim = np.shape(p0)
 
     sampler = emcee.EnsembleSampler(
-        nwalks, ndim, lprob, moves=moves, pool=pool, backend=backend, seed=seed)
+        nwalks, ndim, lprob, moves=moves, pool=pool, backend=backend)
 
     if not verbose:  # verbose means VERY verbose
         warnings.filterwarnings("ignore")
