@@ -295,8 +295,12 @@ def posteriorplot(
     **kwargs
 ):
 
-    axs = []
-    figs = []
+    ax_given = ax
+    if ax_given is None:
+        axs = []
+        figs = []
+    else:
+        plots_per_fig = 1
 
     if varnames is not None:
         dim = len(varnames)
@@ -326,10 +330,10 @@ def posteriorplot(
                     ax = ax[:-1]
             return fig, ax
 
-        if ax is None:
+        if ax_given is None:
             fig, ax = create_axes_grid(figsize, vnames_chunk)
         else:
-            ax = apx
+            ax = ax_given[ic]
 
         var_num = len(vnames_chunk)
         if ref_val is None:
@@ -362,10 +366,12 @@ def posteriorplot(
 
         plt.tight_layout()
 
-        axs.append(ax)
-        figs.append(fig)
+        if ax_given is None:
+            axs.append(ax)
+            figs.append(fig)
 
-    return figs, axs
+    if ax_given is None:
+        return figs, axs
 
 
 def traceplot(
