@@ -60,6 +60,10 @@ def get_prior(prior, verbose=False):
         elif str(ptype) == "normal":
             ndist = ss.norm(loc=pmean, scale=pstdd)
 
+        elif str(ptype) == "t":
+            # currently degrees of freedom are hardwired
+            ndist = ss.t(2.1, loc=pmean, scale=pstdd)
+
         elif str(ptype) == "gamma":
             b = pstdd ** 2 / pmean
             a = pmean / b

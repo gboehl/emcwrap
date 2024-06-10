@@ -282,6 +282,7 @@ def scale_text(figsize, text_size):
 def posteriorplot(
     trace,
     varnames=None,
+    prior=None,
     tune=0,
     figsize=None,
     plots_per_fig=4,
@@ -313,6 +314,10 @@ def posteriorplot(
             vnames_chunk = varnames[ic: ic + plots_per_fig]
         else:
             vnames_chunk = [None] * min(plots_per_fig, dim - ic)
+        if prior is not None:
+            prior_chunk = prior[ic: ic + plots_per_fig]
+        else:
+            prior_chunk = [None] * min(plots_per_fig, dim - ic)
         trace_chunk = trace[..., ic: ic + plots_per_fig]
 
         def create_axes_grid(figsize, traces):
@@ -350,11 +355,12 @@ def posteriorplot(
             print("Given axis does not match number of plots")
         for idx, (a, v) in enumerate(zip(np.atleast_1d(ax), vnames_chunk)):
             tr_values = trace_chunk[-tune:, :, idx].flatten()
+            pr_values = prior_chunk[idx]
             plot_posterior_op(
                 tr_values,
                 ax=a,
                 bw=bw,
-                prior=None,
+                prior=pr_values,
                 round_to=round_to,
                 alpha_level=alpha_level,
                 ref_val=ref_val[idx],
