@@ -238,6 +238,11 @@ def plot_posterior_op(
         if key not in d:
             d[key] = value
 
+    if prior is not None:
+        x = np.linspace(*ax.get_xlim(), 100)
+        ax.plot(x, prior.pdf(x), "--",
+                c=kwargs.pop("prior_color", "C1"), alpha=0.8)
+
     if kde_plot and isinstance(trace_values[0], float):
         kdeplot_op(
             ax, trace_values, bw=bw, prior_alpha=kwargs.pop("alpha", 0.35), **kwargs
@@ -249,10 +254,6 @@ def plot_posterior_op(
         set_key_if_doesnt_exist(kwargs, "align", "right")
         set_key_if_doesnt_exist(kwargs, "color", "#87ceeb")
         ax.hist(trace_values, density=True, **kwargs)
-
-    if prior is not None:
-        x = np.linspace(*ax.get_xlim(), 100)
-        ax.plot(x, prior.pdf(x), "--", c="C1", alpha=0.8)
 
     plot_height = ax.get_ylim()[1]
 
@@ -487,7 +488,8 @@ def traceplot(
                 axs[-1][1].fill_between(
                     range(width - tune, width), *i66s[:, - tune:], lw=0, alpha=0.4, color="C1"
                 )
-                axs[-1][1].plot(range(width - tune, width), means[- tune:], lw=2, c="C0")
+                axs[-1][1].plot(range(width - tune, width),
+                                means[- tune:], lw=2, c="C0")
                 axs[-1][1].plot(
                     range(0, width - tune + 1), means[: - tune + 1], lw=2, c="C0", alpha=0.5
                 )
@@ -538,5 +540,3 @@ def traceplot(
             axs[-1][1].legend(custom_lines_trace, ["Burn-in", "Posterior"])
 
     return figs, subfigs, axs
-
-
