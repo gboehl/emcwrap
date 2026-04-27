@@ -5,7 +5,8 @@ emcwrap
 
 This provides a series of tools around the Differential-Independence Mixture Ensemble (DIME) MCMC sampler together with a nice set of statistical tools for Bayesian analysis. DIME MCMC is developed in `An Ensemble MCMC Sampler for Robust Bayesian Inference <https://gregorboehl.com/live/dime_mcmc_boehl.pdf>`_. *(Gregor Boehl, 2022, SSRN No. 4250395)*.
 
-There exists a stand-alone implementations of the sampler in the ``dime_sampler`` `package <https://github.com/gboehl/dime_sampler>`_.
+There exists a stand-alone implementations of the sampler in the ``dime_sampler`` `package <https://github.com/gboehl/dime_sampler>`_ and complementary stand-alone implementations in `Julia language <https://github.com/gboehl/DIMESampler.jl>`_ and `in matlab <https://github.com/gboehl/dime-mcmc-matlab>`_. DIME is also part of `Dynare 7.0 <https://www.dynare.org/manual/the-model-file.html#posterior-sampling-options>`_ (sampler option ``dime_mcmc``). 
+
 
 The sampler has a series of advantages over conventional samplers:
 
@@ -22,8 +23,9 @@ There is a nice `set of slides <https://gregorboehl.com/revealjs/emc>`_ on my we
 
   Figure: A trimodal example distribution in 35 dimensions
 
-Installation
-------------
+
+Installation and Kudos
+----------------------
 
 Installing the `repository version <https://pypi.org/project/econpizza/>`_ from PyPi is as simple as typing
 
@@ -31,7 +33,16 @@ Installing the `repository version <https://pypi.org/project/econpizza/>`_ from 
 
    pip install emcwrap
 
-in your terminal or Anaconda Prompt.
+in your terminal or Anaconda Prompt. If you are using this software in your research, please cite
+
+.. code-block:: bibtex
+
+    @techreport{boehl2022mcmc,
+    author={Gregor Boehl},
+    title={DIME MCMC: A Swiss Army Knife for Bayesian Inference},
+    journal={Available at SSRN 4250395},
+    year={2022}
+    }
 
 
 Usage
@@ -170,17 +181,3 @@ While DIME is an MCMC sampler, it can straightforwardly be used as a global opti
 .. image:: https://github.com/gboehl/emcwrap/blob/main/docs/lprobs.png?raw=true
   :width: 800
   :alt: Log-likelihoods
-
-References
-----------
-
-If you are using this software in your research, please cite
-
-.. code-block:: bibtex
-
-    @techreport{boehl2022mcmc,
-    author={Gregor Boehl},
-    title={Ensemble MCMC Sampling for Robust Bayesian Inference},
-    journal={Available at SSRN 4250395},
-    year={2022}
-    }
